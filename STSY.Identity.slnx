@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="STSY.Identity.Abstraction/STSY.Identity.Abstraction.csproj" />
+  <Project Path="STSY.Microsoft.Identity/STSY.Microsoft.Identity.csproj" />
+</Solution>
