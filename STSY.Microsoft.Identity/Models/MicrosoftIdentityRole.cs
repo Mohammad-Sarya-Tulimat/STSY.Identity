@@ -2,7 +2,7 @@
 
 namespace STSY.Identity.Models
 {
-    internal class Role : IdentityRole
+    public class MicrosoftIdentityRole : IdentityRole
     {
     }
 }

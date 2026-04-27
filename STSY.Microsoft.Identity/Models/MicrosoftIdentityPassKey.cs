@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace STSY.Identity.Models
 {
-    internal class User : IdentityUser
+    public class MicrosoftIdentityPassKey : IdentityUserPasskey<Guid>
     {
-
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace STSY.Identity.Abstraction.Models.Output
+namespace STSY.Identity.Abstraction.Models.UserModel
 {
-    public class ExtendedUser : User
+    public class ExtendedUser : UserData
     {
         public bool IsEmailConfirmed { get; set; }
         public bool IsPhoneNumberConfirmed { get; set; }

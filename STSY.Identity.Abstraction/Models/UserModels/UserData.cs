@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace STSY.Identity.Abstraction.Models.Output
+namespace STSY.Identity.Abstraction.Models.UserModel
 {
-    public class User
+    public class UserData
     {
         public string Id { get; set; }
         public string Name { get; set; }
