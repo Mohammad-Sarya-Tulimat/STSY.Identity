@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace STSY.Identity.Abstraction.Models.UserModel
+namespace STSY.Identity.Abstraction.Models.Output.UserModels
 {
     public class ExtendedUser : UserData
     {

@@ -1,5 +1,7 @@
 ﻿using STSY.Identity.Abstraction.Contract.Tokens;
-using STSY.Identity.Abstraction.Models.UserModel;
+using STSY.Identity.Abstraction.Models.Output;
+using STSY.Identity.Abstraction.Models.Output.UserModels;
+using STSY.Identity.Abstraction.Options;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,13 +11,18 @@ namespace STSY.Identity.Abstraction.Service
 {
     public class RandomTokenGenerator : IRefreshTokenGenerator
     {
-        public async Task<string> GenerateRefreshToken(ExtendedUser userData)
+        private readonly RandomRefreshTokenOption _randomRefreshTokenOption;
+        public RandomTokenGenerator(RandomRefreshTokenOption randomRefreshTokenOption)
+        {
+            _randomRefreshTokenOption = randomRefreshTokenOption;
+        }
+        public async Task<TokenData> GenerateRefreshToken(ExtendedUser userData)
         {
             using (var rng = RandomNumberGenerator.Create())
             {
 
                 StringBuilder builder = new StringBuilder();
-                var buffer = new byte[64];
+                var buffer = new byte[_randomRefreshTokenOption.RefreshTokenSize];
                 rng.GetBytes(buffer);
                 builder
                     .Append(Guid.NewGuid().ToString().Replace("-", ""))
@@ -23,7 +30,12 @@ namespace STSY.Identity.Abstraction.Service
                     .Append(Guid.NewGuid().ToString().Replace("-", ""))
                     ;
                 var token = builder.ToString();
-                return token;
+                return new TokenData
+                {
+                    Token = token,
+                    TokenType = "Refresh",
+                    Expiration = DateTimeOffset.UtcNow.AddHours(_randomRefreshTokenOption.ExpireHours)
+                };
             }
         }
     }
