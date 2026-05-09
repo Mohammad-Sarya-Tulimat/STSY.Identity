@@ -36,6 +36,23 @@ namespace STSY.Microsoft.Identity.Services
 
             await _userManager.CreateAsync(user, input.Password);
         }
+        public async Task<bool> IsSecurityChangesAllowed(string userId, string sessionId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            return user.CanEditeSecurityData(sessionId);
+        }
+        public async Task EnableSecurityChanges(string userId, string sessionId, DateTimeOffset expiration, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            user.UpdateSecurityStampSession(sessionId, expiration);
+            await _userManager.UpdateAsync(user);
+        }
+        public async Task DisableSecurityChanges(string userId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            user.RemoveSecurityStampSession();
+            await _userManager.UpdateAsync(user);
+        }
         #endregion
         #region IPasswordManager
         public async Task ChangeUserPassword(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken)
@@ -77,6 +94,16 @@ namespace STSY.Microsoft.Identity.Services
             }
         }
 
+        private async Task DisableTowFactorIfNoOther(MicrosoftIdentityUser user)
+        {
+            bool hasEmail = await _userManager.IsEmailConfirmedAsync(user);
+            bool hasPhone = await _userManager.IsPhoneNumberConfirmedAsync(user);
+            bool hasCode = await _userManager.CountRecoveryCodesAsync(user) != 0;
+            if (!(hasEmail || hasPhone || hasCode))
+            {
+                await _userManager.SetTwoFactorEnabledAsync(user, false);
+            }
+        }
         public async Task<List<string>> GenerateNewRecoveryCode(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -87,12 +114,16 @@ namespace STSY.Microsoft.Identity.Services
         {
             var user = await _userManager.FindByIdAsync(userId);
             await _userManager.ResetAuthenticatorKeyAsync(user);
+            await DisableTowFactorIfNoOther(user);
             return await _userManager.GetAuthenticatorKeyAsync(user);
         }
         public async Task<bool> ValidateTOTKey(string userId, string code, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            return await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
+            var result = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
+            if (result && !await _userManager.GetTwoFactorEnabledAsync(user))
+                await SetTwoFactorEnabled(user.Id, true, cancellationToken);
+            return result;
         }
         #endregion
     }

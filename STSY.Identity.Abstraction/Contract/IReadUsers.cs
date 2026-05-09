@@ -13,6 +13,7 @@ namespace STSY.Identity.Abstraction.Contract
     {
         Task<IQueryable<UserData>> GetUsersAsync(Expression<Func<UserData, bool>> expression);
         Task<ExtendedUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default);
+        Task<ExtendedUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail, CancellationToken cancellationToken = default);
         Task<IEnumerable<UserPassKey>> GetUserPassKeyAsync(string userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<UserSession>> GetUserSessionsAsync(string userId, CancellationToken cancellationToken = default);
 

@@ -32,6 +32,17 @@ namespace STSY.Microsoft.Identity.Services
             return user.ToExtendedUser(roles.ToList());
         }
 
+        public async Task<ExtendedUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail, CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByNameAsync(userNameOrEmail);
+            if (user == null)
+                user = await _userManager.FindByEmailAsync(userNameOrEmail);
+            if (user == null)
+                return null;
+            var roles = await _userManager.GetRolesAsync(user);
+            return user.ToExtendedUser(roles.ToList());
+        }
+
         public async Task<IEnumerable<UserPassKey>> GetUserPassKeyAsync(string userId, CancellationToken cancellationToken = default)
         {
 
