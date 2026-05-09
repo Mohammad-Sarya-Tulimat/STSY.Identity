@@ -13,9 +13,8 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
     {
         public AuthenticatorUsage Usage => AuthenticatorUsage.MultiFactor;
 
-        public CredentialType CredentialType => CredentialType.RecoveryCode;
-
-
+        public const string CredentialTypeValue = "RecoveryCode";
+        public string CredentialType => CredentialTypeValue;
         UserManager<MicrosoftIdentityUser> _userManager;
         public OTPRecoveryAuthenticator(UserManager<MicrosoftIdentityUser> userManager)
         {

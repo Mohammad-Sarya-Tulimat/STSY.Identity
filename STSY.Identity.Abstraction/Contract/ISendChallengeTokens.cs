@@ -6,6 +6,6 @@ namespace STSY.Identity.Abstraction.Contract
 {
     public interface ISendChallengeTokens
     {
-        Task<bool> SendChallengeTokensAsync(UserData user, CredentialType credentialType, string tokenOrCode);
+        Task<bool> SendChallengeTokensAsync(UserData user, ChallengeTypeToSend credentialType, string tokenOrCode);
     }
 }

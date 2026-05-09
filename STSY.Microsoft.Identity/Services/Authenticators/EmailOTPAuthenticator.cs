@@ -14,9 +14,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
     public class EmailOTPAuthenticator : IAuthenticator, IChallengeAuthenticator
     {
 
+        public const string CredentialTypeValue = "EmailOtp";
+        public string CredentialType => CredentialTypeValue;
         public AuthenticatorUsage Usage => AuthenticatorUsage.MultiFactor;
-
-        public CredentialType CredentialType => CredentialType.EmailOtp;
 
         UserManager<MicrosoftIdentityUser> _userManager;
         ISendChallengeTokens _sendChallengeTokens;
@@ -30,7 +30,7 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             var appUser = await _userManager.FindByIdAsync(user.Id);
             if (!appUser.EmailConfirmed) throw new AuthenticatorException("Email is not confirmed for this user.");
             var token = await _userManager.GenerateTwoFactorTokenAsync(appUser, TokenOptions.DefaultEmailProvider);
-            await _sendChallengeTokens.SendChallengeTokensAsync(user, this.CredentialType, token);
+            await _sendChallengeTokens.SendChallengeTokensAsync(user, ChallengeTypeToSend.EmailOtp, token);
             return new AuthInitiateResult
             {
                 IsSuccess = true,

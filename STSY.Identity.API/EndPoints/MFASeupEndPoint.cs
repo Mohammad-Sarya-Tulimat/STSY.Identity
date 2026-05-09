@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Authentication;
+using STSY.Identity.Abstraction.Contract.Exeptions;
+using STSY.Identity.Abstraction.Contract.Managers;
 
 namespace STSY.Identity.API.EndPoints
 {
@@ -12,44 +14,89 @@ namespace STSY.Identity.API.EndPoints
         public static IEndpointRouteBuilder MapMFASeupApis(this IEndpointRouteBuilder app, string prefix)
         {
             app.MapPost($"{prefix}/mfa/change-recovery-codes", async (
-    [FromServices] ITowFactorManager twoFactorManager,
-    [FromServices] IUserManager userManager,
-    [FromServices] IGetCurrentAuthorizedUser currentUser,
-    CancellationToken token = default
-    ) =>
+            [FromServices] ITwoFactorManager twoFactorManager,
+            [FromServices] IUserManager userManager,
+            [FromServices] IGetCurrentAuthorizedUser currentUser,
+            CancellationToken token = default) =>
             {
-                if (!await userManager.IsSecurityChangesAllowed(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                try
                 {
-                    return Results.Forbid();
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    var recoveryCodes = await twoFactorManager.GenerateNewRecoveryCode(currentUser.CurrentUser.Id, token);
+                    return Results.Ok(recoveryCodes);
                 }
-                var recoveryCodes = await twoFactorManager.GenerateNewRecoveryCode(currentUser.CurrentUser.Id, token);
-                return Results.Ok(recoveryCodes);
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { ex.Message });
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(new { ex.Message });
+                }
             }).RequireAuthorization();
 
             app.MapPost($"{prefix}/mfa/new-totp-key", async (
-                [FromServices] ITowFactorManager twoFactorManager,
+                [FromServices] ITwoFactorManager twoFactorManager,
                 [FromServices] IUserManager userManager,
                 [FromServices] IGetCurrentAuthorizedUser currentUser,
                 CancellationToken token = default
             ) =>
             {
-                if (!await userManager.IsSecurityChangesAllowed(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                try
                 {
-                    return Results.Forbid();
+
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    var recoveryCodes = await twoFactorManager.ReGenerateTOTKey(currentUser.CurrentUser.Id, token);
+                    return Results.Ok(recoveryCodes);
                 }
-                var recoveryCodes = await twoFactorManager.ReGenerateTOTKey(currentUser.CurrentUser.Id, token);
-                return Results.Ok(recoveryCodes);
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { ex.Message });
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(new { ex.Message });
+                }
             }).RequireAuthorization();
 
             app.MapPost($"{prefix}/mfa/validate-totp-key", async (
-            [FromServices] ITowFactorManager twoFactorManager,
+            [FromServices] ITwoFactorManager twoFactorManager,
             [FromServices] IUserManager userManager,
             [FromServices] IGetCurrentAuthorizedUser currentUser,
             [FromBody] Dictionary<string, string> body,
             CancellationToken token = default) =>
             {
-                var recoveryCodes = await twoFactorManager.ValidateTOTKey(currentUser.CurrentUser.Id, body[CredentialKeys.OTP_KEY], token);
-                return Results.Ok(recoveryCodes);
+                try
+                {
+                    var recoveryCodes = await twoFactorManager.ValidateTOTKey(currentUser.CurrentUser.Id, body[CredentialKeys.OTP_KEY], token);
+                    return Results.Ok(recoveryCodes);
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { ex.Message });
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(new { ex.Message });
+                }
             }).RequireAuthorization();
 
             return app;

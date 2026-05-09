@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
+using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Models.Enums;
+using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Abstraction.Models.Output.Auth;
 using STSY.Identity.Abstraction.Models.Output.UserModels;
 using STSY.Identity.Models;
+using STSY.Microsoft.Identity.Mappers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,7 +15,8 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
 {
     public class PassKeyAuthenticator : IAuthenticator, IChallengeAuthenticator, IPassKeyManager
     {
-        public CredentialType CredentialType => CredentialType.PassKey;
+        public const string CredentialTypeValue = "PassKey";
+        public string CredentialType => CredentialTypeValue;
         public AuthenticatorUsage Usage => AuthenticatorUsage.Primary | AuthenticatorUsage.MultiFactor;
 
         UserManager<MicrosoftIdentityUser> _userManager;
@@ -51,23 +54,53 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
                 }
             };
         }
-        public async Task<string> GeneratePassKeyCreation(UserData user)
+        public async Task<string> GeneratePassKeyCreationOptionsAsync(UserData user)
         {
-            var appUser = await _userManager.FindByIdAsync(user.Id);
-            var passkeyCreationObject = new PasskeyUserEntity() { DisplayName = $"{appUser.FirstName},{appUser.LastName}", Id = appUser.Id, Name = appUser.UserName };
-            return await _signInManager.MakePasskeyCreationOptionsAsync(passkeyCreationObject);
+            try
+            {
+                if (user == null) throw new ArgumentNullException(nameof(user), "user data cannot be null");
+                var appUser = await _userManager.FindByIdAsync(user.Id);
+                if (appUser == null) throw new ResourceNotFoundException(nameof(UserData), user.Id, "User not found.");
+                var passkeyCreationObject = new PasskeyUserEntity() { DisplayName = $"{appUser.FirstName},{appUser.LastName}", Id = appUser.Id, Name = appUser.UserName };
+                return await _signInManager.MakePasskeyCreationOptionsAsync(passkeyCreationObject);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
-        public async Task<bool> ValidatePassKey(string credential)
+        public async Task<STSYIdentityResult> PasskeyAttestationAsync(string credential)
         {
-            var result = await _signInManager.PerformPasskeyAttestationAsync(credential);
-
-            return result.Succeeded;
+            try
+            {
+                if (credential == null) throw new ArgumentNullException(nameof(credential), "credential cannot be null");
+                var result = await _signInManager.PerformPasskeyAttestationAsync(credential);
+                return new STSYIdentityResult
+                {
+                    Success = result.Succeeded,
+                    Message = result?.Failure?.Message
+                };
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex)
+            {
+                throw new STSYIdentityException(ex.Message, ex);
+            }
         }
-        public async Task<bool> RemovePassKey(UserData user, byte[] id)
+        public async Task<STSYIdentityResult> RemovePassKey(UserData user, byte[] id)
         {
-            var appUser = await _userManager.FindByIdAsync(user.Id);
-            var result = await _userManager.RemovePasskeyAsync(appUser, id);
-            return result.Succeeded;
+            try
+            {
+                if (user == null) throw new ArgumentNullException(nameof(user), "user data cannot be null");
+                if (id == null) throw new ArgumentNullException(nameof(id), "id cannot be null");
+                var appUser = await _userManager.FindByIdAsync(user.Id);
+                if (appUser == null) throw new ResourceNotFoundException(nameof(UserData), user.Id, "User not found.");
+                var result = await _userManager.RemovePasskeyAsync(appUser, id);
+                return result.AsSTSYIdentityResult();
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
     }
 }

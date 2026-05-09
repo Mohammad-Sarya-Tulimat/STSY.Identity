@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Exeptions;
+using STSY.Identity.Abstraction.Contract.Managers;
 
 namespace STSY.Microsoft.Identity.EndPoints
 {
@@ -20,12 +21,28 @@ namespace STSY.Microsoft.Identity.EndPoints
                 CancellationToken token = default
                 ) =>
             {
-                if (!await userManager.IsSecurityChangesAllowed(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                try
                 {
-                    return Results.Forbid();
+
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    var creationOption = await passKeyManager.GeneratePassKeyCreationOptionsAsync(currentUser.CurrentUser);
+                    return Results.Ok(creationOption);
                 }
-                var creationOption = await passKeyManager.GeneratePassKeyCreation(currentUser.CurrentUser);
-                return Results.Ok(creationOption);
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { ex.Message });
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(new { ex.Message });
+                }
             }).RequireAuthorization();
 
             app.MapPost($"{prefix}/passkey/assert", async (
@@ -36,16 +53,32 @@ namespace STSY.Microsoft.Identity.EndPoints
                 CancellationToken token = default
                 ) =>
             {
-                if (!await userManager.IsSecurityChangesAllowed(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                try
                 {
-                    return Results.Forbid();
+
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    var creationOption = await passKeyManager.PasskeyAttestationAsync(credential);
+                    if (!creationOption.Success)
+                    {
+                        return Results.BadRequest(creationOption);
+                    }
+                    return Results.Ok(creationOption);
                 }
-                var creationOption = await passKeyManager.ValidatePassKey(credential);
-                if (!creationOption)
+                catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { Message = "invalid credential" });
+                    return Results.BadRequest(new { ex.Message });
                 }
-                return Results.Ok(new { Message = "created" });
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(new { ex.Message });
+                }
             }).RequireAuthorization();
 
             app.MapDelete($"{prefix}/passkey/{{id}}", async (
@@ -58,23 +91,35 @@ namespace STSY.Microsoft.Identity.EndPoints
             {
                 try
                 {
-                    if (!await userManager.IsSecurityChangesAllowed(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
                     {
                         return Results.Forbid();
                     }
-                    var removed = await passKeyManager.RemovePassKey(currentUser.CurrentUser, id);
-                    if (removed)
+                    var result = await passKeyManager.RemovePassKey(currentUser.CurrentUser, id);
+                    if (result.Success)
                     {
-                        return Results.Ok(new { Message = "removed" });
+                        return Results.Ok(result);
                     }
                     else
                     {
-                        return Results.BadRequest(new { Message = "cannot delete" });
+                        return Results.BadRequest(result);
                     }
                 }
                 catch (ForbidException ex)
                 {
                     return Results.Forbid();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { ex.Message });
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(new { ex.Message });
                 }
             }).RequireAuthorization();
 

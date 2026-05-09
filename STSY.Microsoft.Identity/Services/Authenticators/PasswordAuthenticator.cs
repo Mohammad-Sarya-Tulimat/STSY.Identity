@@ -11,13 +11,14 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
 {
     public class PasswordAuthenticator : IAuthenticator
     {
+
         UserManager<MicrosoftIdentityUser> _userManager;
         public PasswordAuthenticator(UserManager<MicrosoftIdentityUser> userManager)
         {
             _userManager = userManager;
         }
-        public CredentialType CredentialType => CredentialType.Password;
-
+        public const string CredentialTypeValue = "Password";
+        public string CredentialType => CredentialTypeValue;
         public AuthenticatorUsage Usage => AuthenticatorUsage.Primary;
 
         public async Task<bool> ValidateCredentialAsync(UserData userData, Dictionary<string, object> credentials)

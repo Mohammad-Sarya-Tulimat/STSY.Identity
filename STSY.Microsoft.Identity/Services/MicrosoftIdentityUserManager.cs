@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using STSY.Identity.Abstraction.Contract;
+using STSY.Identity.Abstraction.Contract.Exeptions;
+using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Models.Input;
+using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Models;
+using STSY.Microsoft.Identity.Mappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace STSY.Microsoft.Identity.Services
 {
-    public class MicrosoftIdentityUserManager : IUserManager, IPasswordManager, ITowFactorManager
+    public class MicrosoftIdentityUserManager : IUserManager, IPasswordManager, ITwoFactorManager
     {
         UserManager<MicrosoftIdentityUser> _userManager;
         public MicrosoftIdentityUserManager(UserManager<MicrosoftIdentityUser> userManager)
@@ -18,57 +21,140 @@ namespace STSY.Microsoft.Identity.Services
             _userManager = userManager;
         }
         #region IUserManager
-        public async Task AddRole(string userId, string role, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> AddRole(string userId, string role, CancellationToken cancellationToken)
         {
+            if (role == null) throw new ArgumentNullException(nameof(role));
+            if (userId == null) throw new ArgumentNullException(nameof(userId));
             var user = await _userManager.FindByIdAsync(userId);
-            await _userManager.AddToRoleAsync(user, role);
+            if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+            var result = await _userManager.AddToRoleAsync(user, role);
+            return result.AsSTSYIdentityResult();
         }
-        public async Task CreateUser(UserCreateInput input, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken)
         {
-            var user = new MicrosoftIdentityUser
+            try
             {
-                UserName = input.UserName,
-                Email = input.Email,
-                FirstName = input.FirstName,
-                LastName = input.LastName,
-                PhoneNumber = input.PhoneNumber
-            };
+                if (input == null) throw new ArgumentNullException(nameof(input));
+                var user = new MicrosoftIdentityUser
+                {
+                    UserName = input.UserName,
+                    Email = input.Email,
+                    FirstName = input.FirstName,
+                    LastName = input.LastName,
+                    PhoneNumber = input.PhoneNumber
+                };
+                var result = await _userManager.CreateAsync(user, input.Password);
+                return result.AsSTSYIdentityResult();
+            }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+        public async Task<bool> IsStepUpEnabled(string userId, string sessionId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                if (sessionId == null) throw new ArgumentNullException(nameof(sessionId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                return user.IsStepUpEnabled(sessionId);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+        public async Task<STSYIdentityResult> EnableStepUpAsync(string userId, string sessionId, DateTimeOffset expiration, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                user.UpdateStepUp(sessionId, expiration);
+                await _userManager.UpdateAsync(user);
+                return STSYIdentityResult.SuccessResult;
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+        public async Task<STSYIdentityResult> DisableStepUp(string userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                user.RemoveStepUp();
+                await _userManager.UpdateAsync(user);
+                return STSYIdentityResult.SuccessResult;
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
 
-            await _userManager.CreateAsync(user, input.Password);
-        }
-        public async Task<bool> IsSecurityChangesAllowed(string userId, string sessionId, CancellationToken cancellationToken)
+
+        public async Task<bool> IsMFAEnabled(string userId, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            return user.CanEditeSecurityData(sessionId);
-        }
-        public async Task EnableSecurityChanges(string userId, string sessionId, DateTimeOffset expiration, CancellationToken cancellationToken)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            user.UpdateSecurityStampSession(sessionId, expiration);
-            await _userManager.UpdateAsync(user);
-        }
-        public async Task DisableSecurityChanges(string userId, CancellationToken cancellationToken)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            user.RemoveSecurityStampSession();
-            await _userManager.UpdateAsync(user);
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                return await _userManager.GetTwoFactorEnabledAsync(user);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
         #endregion
         #region IPasswordManager
-        public async Task ChangeUserPassword(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> ChangeUserPassword(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            await _userManager.ChangePasswordAsync(user, oldpassword, newpassword);
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                if (newpassword == null) throw new ArgumentNullException(nameof(newpassword));
+                if (oldpassword == null) throw new ArgumentNullException(nameof(oldpassword));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                var result = await _userManager.ChangePasswordAsync(user, oldpassword, newpassword);
+                return result.AsSTSYIdentityResult();
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
         public async Task<string> GeneratePasswordResetTokenAsync(string userId, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            return await _userManager.GeneratePasswordResetTokenAsync(user);
+            try
+            {
+
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                return await _userManager.GeneratePasswordResetTokenAsync(user);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
-        public async Task ResetPassword(string userId, string resetToken, string newPassword, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> ResetPassword(string userId, string resetToken, string newPassword, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                if (newPassword == null) throw new ArgumentNullException(nameof(newPassword));
+                if (resetToken == null) throw new ArgumentNullException(nameof(resetToken));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+                return result.AsSTSYIdentityResult();
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
         #endregion 
         #region ITowFactorManager
@@ -106,24 +192,49 @@ namespace STSY.Microsoft.Identity.Services
         }
         public async Task<List<string>> GenerateNewRecoveryCode(string userId, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 6);
-            return recoveryCodes.ToList();
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 6);
+                return recoveryCodes.ToList();
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
         public async Task<string> ReGenerateTOTKey(string userId, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            await _userManager.ResetAuthenticatorKeyAsync(user);
-            await DisableTowFactorIfNoOther(user);
-            return await _userManager.GetAuthenticatorKeyAsync(user);
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                await DisableTowFactorIfNoOther(user);
+                return await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
         public async Task<bool> ValidateTOTKey(string userId, string code, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            var result = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
-            if (result && !await _userManager.GetTwoFactorEnabledAsync(user))
-                await SetTwoFactorEnabled(user.Id, true, cancellationToken);
-            return result;
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                if (code == null) throw new ArgumentNullException(nameof(code));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                var result = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
+                if (result && !await _userManager.GetTwoFactorEnabledAsync(user))
+                    await SetTwoFactorEnabled(user.Id, true, cancellationToken);
+                return result;
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
         #endregion
     }

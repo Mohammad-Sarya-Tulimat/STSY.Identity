@@ -15,7 +15,8 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
     {
         public AuthenticatorUsage Usage => AuthenticatorUsage.MultiFactor;
 
-        public CredentialType CredentialType => CredentialType.SmsOtp;
+        public const string CredentialTypeValue = "SmsOtp";
+        public string CredentialType => CredentialTypeValue;
 
         private readonly ISendChallengeTokens _sendChallengeTokens;
 
@@ -30,7 +31,7 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             var appUser = await _userManager.FindByIdAsync(user.Id);
             if (!appUser.PhoneNumberConfirmed) throw new AuthenticatorException("Phone number is not confirmed for this user.");
             var token = await _userManager.GenerateTwoFactorTokenAsync(appUser, TokenOptions.DefaultPhoneProvider);
-            await _sendChallengeTokens.SendChallengeTokensAsync(user, this.CredentialType, token);
+            await _sendChallengeTokens.SendChallengeTokensAsync(user, ChallengeTypeToSend.SmsOtp, token);
             return new AuthInitiateResult
             {
                 IsSuccess = true,

@@ -2,7 +2,7 @@
 
 namespace STSY.Identity.Abstraction.Contract.Exeptions
 {
-    public class AuthenticatorException : ApplicationException
+    public class AuthenticatorException : STSYIdentityException
     {
         public AuthenticatorException(string message) : base(message)
         {

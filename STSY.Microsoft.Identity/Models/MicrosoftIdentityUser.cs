@@ -13,16 +13,16 @@ namespace STSY.Identity.Models
         public DateTimeOffset SecurityChangeSessionExpiresAt { get; set; }
         public string? SecurityChangeSessionId { get; set; }
 
-        public bool CanEditeSecurityData(string sessionId)
+        public bool IsStepUpEnabled(string sessionId)
         {
             return SecurityChangeSessionId == sessionId && SecurityChangeSessionExpiresAt > DateTimeOffset.UtcNow;
         }
-        public void UpdateSecurityStampSession(string sessionId, DateTimeOffset expiresAt)
+        public void UpdateStepUp(string sessionId, DateTimeOffset expiresAt)
         {
             SecurityChangeSessionId = sessionId;
             SecurityChangeSessionExpiresAt = expiresAt;
         }
-        public void RemoveSecurityStampSession()
+        public void RemoveStepUp()
         {
             SecurityChangeSessionId = null;
             SecurityChangeSessionExpiresAt = DateTimeOffset.MinValue;

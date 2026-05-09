@@ -9,7 +9,7 @@ namespace STSY.Identity.Abstraction.Contract.Authentication
     public interface IAuthenticator
     {
         AuthenticatorUsage Usage { get; }
-        CredentialType CredentialType { get; }
+        string CredentialType { get; }
         Task<bool> ValidateCredentialAsync(UserData userData, Dictionary<string, object> credentials);
     }
 

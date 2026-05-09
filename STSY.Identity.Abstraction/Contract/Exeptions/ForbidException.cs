@@ -2,7 +2,7 @@
 
 namespace STSY.Identity.Abstraction.Contract.Exeptions
 {
-    public class ForbidException : ApplicationException
+    public class ForbidException : STSYIdentityException
     {
         public ForbidException(string message) : base(message)
         {

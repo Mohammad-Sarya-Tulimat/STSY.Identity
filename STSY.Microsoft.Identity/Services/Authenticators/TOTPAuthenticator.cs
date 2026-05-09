@@ -12,7 +12,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
     public class TOTPAuthenticator : IAuthenticator
     {
         public AuthenticatorUsage Usage => AuthenticatorUsage.MultiFactor;
-        public CredentialType CredentialType => CredentialType.TOtp;
+
+        public const string CredentialTypeValue = "TOtp";
+        public string CredentialType => CredentialTypeValue;
 
         UserManager<MicrosoftIdentityUser> _userManager;
         public TOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager)

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Abstraction.Models.Output.UserModels;
@@ -59,17 +58,6 @@ namespace STSY.Microsoft.Identity.Services
             if (expression != null)
                 users = users.Where(expression);
             return users;
-        }
-
-        public async Task<IEnumerable<UserSession>> GetUserSessionsAsync(string userId, CancellationToken cancellationToken = default)
-        {
-            return await _sTSYIdentityDbContext.UserSessions.Where(s => userId.Equals(s.UserId)).Select(s => new UserSession
-            {
-                Id = s.Id.ToString(),
-                IpAddress = s.IpAddress,
-                Location = s.Location,
-                DateTimeOffset = s.CreatedAt
-            }).ToListAsync(cancellationToken);
         }
     }
 }
