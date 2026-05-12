@@ -1,4 +1,4 @@
-﻿using STSY.Identity.Abstraction.Models.Output;
+﻿using STSY.Identity.Abstraction.Models.Output.Tokens;
 using STSY.Identity.Abstraction.Models.Output.UserModels;
 using System.Threading.Tasks;
 

@@ -70,5 +70,8 @@ namespace STSY.Identity.Abstraction.Contract.Managers
 
         Task<bool> IsMFAEnabled(string userId, CancellationToken cancellationToken);
 
+        Task<bool> IsLocked(string userId, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> AccessFailedAsync(string userId, CancellationToken cancellationToken);
+
     }
 }

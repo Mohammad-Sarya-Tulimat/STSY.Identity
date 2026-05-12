@@ -1,4 +1,4 @@
-﻿namespace STSY.Identity.Abstraction.Models.Output
+﻿namespace STSY.Identity.Abstraction.Models.Output.Tokens
 {
     public class TokenValidationResult
     {

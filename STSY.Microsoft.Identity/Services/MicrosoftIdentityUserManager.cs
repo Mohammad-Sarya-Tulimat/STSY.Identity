@@ -108,6 +108,33 @@ namespace STSY.Microsoft.Identity.Services
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
+        public async Task<bool> IsLocked(string userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                return await _userManager.IsLockedOutAsync(user);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+
+        public async Task<STSYIdentityResult> AccessFailedAsync(string userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                return (await _userManager.AccessFailedAsync(user)).AsSTSYIdentityResult();
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
         #endregion
         #region IPasswordManager
         public async Task<STSYIdentityResult> ChangeUserPassword(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken)
@@ -236,6 +263,8 @@ namespace STSY.Microsoft.Identity.Services
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
+
+
         #endregion
     }
 }

@@ -1,0 +1,18 @@
+﻿using STSY.Identity.Abstraction.Models.Output;
+using STSY.Identity.Abstraction.Models.Output.Sessions;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace STSY.Identity.Abstraction.Contract.Managers
+{
+    public interface ISessionStorage
+    {
+        Task<IEnumerable<UserSession>> ListSession(string userId, CancellationToken cancellationToken);
+        Task<UserSession> GetSession(string userId, string seassionId, CancellationToken cancellationToken);
+        Task<IDictionary<string, object>> GetSessionProtectedData(string userId, string seassionId, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> AddSession(string userId, UserSession session, IDictionary<string, object> sessionProtectionData, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> UpdateSession(string userId, UserSession session, IDictionary<string, object> sessionProtectionData, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> RemoveSession(string userId, string sessionId, CancellationToken cancellationToken);
+    }
+}
