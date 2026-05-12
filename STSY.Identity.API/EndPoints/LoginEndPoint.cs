@@ -11,7 +11,7 @@ namespace STSY.Identity.API.EndPoints
     {
         public static IEndpointRouteBuilder MapLoginEndPoint(this IEndpointRouteBuilder app, string prefix)
         {
-            app.MapPost($"{prefix}/auth/challenge", async ([FromServices] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
+            app.MapPost($"{prefix}/auth/challenge", async ([FromBody] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
             {
                 try
                 {
@@ -44,7 +44,7 @@ namespace STSY.Identity.API.EndPoints
                 }
             }).AllowAnonymous();
 
-            app.MapPost($"{prefix}/auth/login", async ([FromServices] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
+            app.MapPost($"{prefix}/auth/login", async ([FromBody] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
             {
                 try
                 {
@@ -76,7 +76,7 @@ namespace STSY.Identity.API.EndPoints
                     return Results.InternalServerError("error while processing  login");
                 }
             }).AllowAnonymous();
-            app.MapPost($"{prefix}/auth/mfa_login", async ([FromServices] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
+            app.MapPost($"{prefix}/auth/mfa_login", async ([FromBody] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
             {
                 try
                 {
