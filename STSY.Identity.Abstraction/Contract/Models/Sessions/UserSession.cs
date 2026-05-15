@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace STSY.Identity.Abstraction.Models.Output.Sessions
+namespace STSY.Identity.Abstraction.Contract.Models.Sessions
 {
     public class UserSession
     {

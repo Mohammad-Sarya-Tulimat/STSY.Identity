@@ -1,4 +1,4 @@
-﻿using STSY.Identity.Abstraction.Models.Output.UserModels;
+﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;

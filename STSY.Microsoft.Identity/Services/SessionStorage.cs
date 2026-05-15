@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using STSY.Identity.Abstraction.Contract.Managers;
+using STSY.Identity.Abstraction.Contract.Models.Sessions;
 using STSY.Identity.Abstraction.Models.Output;
-using STSY.Identity.Abstraction.Models.Output.Sessions;
 using STSY.Microsoft.Identity.DBContext;
 using STSY.Microsoft.Identity.Mappers;
 using System.Collections.Generic;

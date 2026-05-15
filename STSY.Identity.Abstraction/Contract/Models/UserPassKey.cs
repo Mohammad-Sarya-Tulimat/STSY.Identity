@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace STSY.Identity.Abstraction.Models.Output
+namespace STSY.Identity.Abstraction.Contract.Models
 {
     public class UserPassKey
     {

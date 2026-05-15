@@ -1,5 +1,5 @@
-﻿using STSY.Identity.Abstraction.Models.Output;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
+﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Models.Output;
 using System.Threading.Tasks;
 
 namespace STSY.Identity.Abstraction.Contract.Managers

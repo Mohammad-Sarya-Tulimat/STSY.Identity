@@ -1,5 +1,5 @@
-﻿using STSY.Identity.Abstraction.Models.Output;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
+﻿using STSY.Identity.Abstraction.Contract.Models;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

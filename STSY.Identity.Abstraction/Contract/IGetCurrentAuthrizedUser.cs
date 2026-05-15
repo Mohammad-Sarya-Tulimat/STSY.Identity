@@ -1,4 +1,4 @@
-﻿using STSY.Identity.Abstraction.Models;
+﻿using STSY.Identity.Abstraction.Contract.Models;
 
 namespace STSY.Identity.Abstraction.Contract
 {

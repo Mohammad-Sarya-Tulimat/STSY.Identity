@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Enums;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
 using STSY.Identity.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;

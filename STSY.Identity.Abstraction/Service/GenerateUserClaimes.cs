@@ -1,5 +1,5 @@
-﻿using STSY.Identity.Abstraction.Contract.Tokens;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
+﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Contract.Tokens;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;

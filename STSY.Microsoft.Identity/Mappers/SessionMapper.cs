@@ -1,4 +1,4 @@
-﻿using STSY.Identity.Abstraction.Models.Output.Sessions;
+﻿using STSY.Identity.Abstraction.Contract.Models.Sessions;
 using STSY.Microsoft.Identity.Models;
 using System.Collections.Generic;
 using System.Linq;

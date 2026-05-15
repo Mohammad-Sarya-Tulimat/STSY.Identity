@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract;
-using STSY.Identity.Abstraction.Models.Output;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
+using STSY.Identity.Abstraction.Contract.Models;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.DBContext;
 using STSY.Microsoft.Identity.Mappers;

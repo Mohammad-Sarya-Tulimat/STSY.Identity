@@ -1,6 +1,6 @@
-﻿using STSY.Identity.Abstraction.Contract.Tokens;
+﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Contract.Tokens;
 using STSY.Identity.Abstraction.Models.Output.Tokens;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
 using STSY.Identity.Abstraction.Options;
 using System;
 using System.Security.Cryptography;

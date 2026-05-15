@@ -1,5 +1,5 @@
-﻿using STSY.Identity.Abstraction.Models.Enums;
-using STSY.Identity.Abstraction.Models.Output.UserModels;
+﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Models.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

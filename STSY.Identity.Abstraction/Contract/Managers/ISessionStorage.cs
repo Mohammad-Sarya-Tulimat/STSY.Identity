@@ -1,5 +1,5 @@
-﻿using STSY.Identity.Abstraction.Models.Output;
-using STSY.Identity.Abstraction.Models.Output.Sessions;
+﻿using STSY.Identity.Abstraction.Contract.Models.Sessions;
+using STSY.Identity.Abstraction.Models.Output;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
