@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Models;
-using STSY.Identity.Abstraction.Models.Enums;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.Mappers;
 using System;
@@ -20,7 +19,6 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         }
         public const string CredentialTypeValue = "Password";
         public string CredentialType => CredentialTypeValue;
-        public AuthenticatorUsage Usage => AuthenticatorUsage.Primary;
 
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
@@ -33,7 +31,8 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             return new AuthenticatorResult
             {
                 Success = isValid,
-                User = user.ToUserData()
+                User = user.ToUserData(),
+                NeedMfactor = true,
             };
         }
     }

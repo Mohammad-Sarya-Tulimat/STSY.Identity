@@ -13,9 +13,8 @@ using System.Threading.Tasks;
 
 namespace STSY.Microsoft.Identity.Services.Authenticators
 {
-    public class SMSOTPAuthenticator : IAuthenticator, IChallengeAuthenticator
+    public class SMSOTPAuthenticator : IMFAuthenticator, IChallengeAuthenticator
     {
-        public AuthenticatorUsage Usage => AuthenticatorUsage.MultiFactor;
 
         public const string CredentialTypeValue = "SmsOtp";
         public string CredentialType => CredentialTypeValue;
@@ -46,11 +45,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             };
         }
 
-        public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
+        public async Task<AuthenticatorResult> ValidateCredentialAsync(string userId, Dictionary<string, object> credentials)
         {
-            var validation = await _sessionManager.ValidateMFSessionAsync(credentials);
-            if (!validation.Success) throw new AuthenticatorException("Invalid or expired session.");
-            var appUser = await _userManager.FindByIdAsync(validation.UserId);
+            var appUser = await _userManager.FindByIdAsync(userId);
             if (!appUser.PhoneNumberConfirmed) throw new AuthenticatorException("Phone number is not confirmed for this user.");
             if (credentials == null || !credentials.ContainsKey(CredentialKeys.OTP_KEY)) throw new AuthenticatorException("OTP is required.");
             if (!await _userManager.GetTwoFactorEnabledAsync(appUser)) throw new AuthenticatorException("Two factor authentication is not enabled for this user.");

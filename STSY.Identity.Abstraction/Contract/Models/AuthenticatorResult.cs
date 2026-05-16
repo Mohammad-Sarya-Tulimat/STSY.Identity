@@ -6,5 +6,6 @@ namespace STSY.Identity.Abstraction.Contract.Models
     {
         public bool Success { get; set; }
         public UserData User { get; set; }
+        public bool NeedMfactor { get; set; } = false;
     }
 }

@@ -2,7 +2,6 @@
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Models;
-using STSY.Identity.Abstraction.Models.Enums;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.Mappers;
 using System.Collections.Generic;
@@ -10,9 +9,8 @@ using System.Threading.Tasks;
 
 namespace STSY.Microsoft.Identity.Services.Authenticators
 {
-    public class TOTPAuthenticator : IAuthenticator
+    public class TOTPAuthenticator : IMFAuthenticator
     {
-        public AuthenticatorUsage Usage => AuthenticatorUsage.MultiFactor;
 
         public const string CredentialTypeValue = "TOtp";
         public string CredentialType => CredentialTypeValue;
@@ -24,11 +22,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             _userManager = userManager;
             _sessionManager = sessionManager;
         }
-        public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
+        public async Task<AuthenticatorResult> ValidateCredentialAsync(string userId, Dictionary<string, object> credentials)
         {
-            var validation = await _sessionManager.ValidateMFSessionAsync(credentials);
-            if (!validation.Success) throw new AuthenticatorException("Invalid or expired session.");
-            var appUser = await _userManager.FindByIdAsync(validation.UserId);
+            var appUser = await _userManager.FindByIdAsync(userId);
             if (credentials == null || !credentials.ContainsKey(CredentialKeys.OTP_KEY)) throw new AuthenticatorException("OTP is required.");
             if (!await _userManager.GetTwoFactorEnabledAsync(appUser)) throw new AuthenticatorException("Two factor authentication is not enabled for this user.");
             var isValid = await _userManager.VerifyTwoFactorTokenAsync(appUser, TokenOptions.DefaultAuthenticatorProvider, credentials[CredentialKeys.OTP_KEY].ToString());

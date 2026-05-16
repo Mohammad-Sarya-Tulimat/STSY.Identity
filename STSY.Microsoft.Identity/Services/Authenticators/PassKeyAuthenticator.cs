@@ -4,7 +4,6 @@ using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
-using STSY.Identity.Abstraction.Models.Enums;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Abstraction.Models.Output.Auth;
 using STSY.Identity.Models;
@@ -14,15 +13,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace STSY.Microsoft.Identity.Services.Authenticators
 {
-    public class PassKeyAuthenticator : IAuthenticator, IChallengeAuthenticator, IPassKeyManager
+    public class PassKeyAuthenticator : IMFAuthenticator, IAuthenticator, IChallengeAuthenticator, IPassKeyManager
     {
         public const string CredentialTypeValue = "PassKey";
         public string CredentialType => CredentialTypeValue;
-        public AuthenticatorUsage Usage => AuthenticatorUsage.Primary | AuthenticatorUsage.MultiFactor;
-
         UserManager<MicrosoftIdentityUser> _userManager;
         SignInManager<MicrosoftIdentityUser> _signInManager;
-
         public PassKeyAuthenticator(UserManager<MicrosoftIdentityUser> userManager, SignInManager<MicrosoftIdentityUser> signInManager)
         {
             _userManager = userManager;
@@ -37,6 +33,13 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
                 Success = userKey.Succeeded,
                 User = userKey.User.ToUserData(),
             };
+        }
+
+        public async Task<AuthenticatorResult> ValidateCredentialAsync(string userId, Dictionary<string, object> credentials)
+        {
+            var result = await this.ValidateCredentialAsync(credentials);
+            result.Success = result.Success && string.Equals(result.User.Id, userId);
+            return result;
         }
         public async Task<AuthInitiateResult> InitiateAsync(UserData user)
         {
@@ -99,5 +102,6 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
+
     }
 }

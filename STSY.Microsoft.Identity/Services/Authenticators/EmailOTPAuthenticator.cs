@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace STSY.Microsoft.Identity.Services.Authenticators
 {
-    public class EmailOTPAuthenticator : IChallengeAuthenticator
+    public class EmailOTPAuthenticator : IMFAuthenticator, IChallengeAuthenticator
     {
 
         public const string CredentialTypeValue = "EmailOtp";
@@ -21,12 +21,10 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
 
         UserManager<MicrosoftIdentityUser> _userManager;
         ISendChallengeTokens _sendChallengeTokens;
-        ISessionManager _sessionManager;
-        public EmailOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager, ISendChallengeTokens sendChallengeTokens, ISessionManager sessionManager)
+        public EmailOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager, ISendChallengeTokens sendChallengeTokens)
         {
             _userManager = userManager;
             _sendChallengeTokens = sendChallengeTokens;
-            _sessionManager = sessionManager;
         }
         public async Task<AuthInitiateResult> InitiateAsync(UserData user)
         {
@@ -43,11 +41,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
                 }
             };
         }
-        public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
+        public async Task<AuthenticatorResult> ValidateCredentialAsync(string userId, Dictionary<string, object> credentials)
         {
-            var validation = await _sessionManager.ValidateMFSessionAsync(credentials);
-            if (!validation.Success) throw new AuthenticatorException("Invalid or expired session.");
-            var appUser = await _userManager.FindByIdAsync(validation.UserId);
+            var appUser = await _userManager.FindByIdAsync(userId);
             if (!appUser.EmailConfirmed) throw new AuthenticatorException("Email is not confirmed for this user.");
             if (credentials == null || !credentials.ContainsKey(CredentialKeys.OTP_KEY)) throw new AuthenticatorException("OTP is required.");
             if (!await _userManager.GetTwoFactorEnabledAsync(appUser)) throw new AuthenticatorException("Two factor authentication is not enabled for this user.");

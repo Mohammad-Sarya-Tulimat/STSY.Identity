@@ -1,7 +1,6 @@
 ﻿using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Models;
-using STSY.Identity.Abstraction.Models.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,7 +16,6 @@ namespace STSY.Identity.Google.Authenticators
             _options = options;
             _readUsers = readUsers;
         }
-        public AuthenticatorUsage Usage => AuthenticatorUsage.Primary;
         public string CredentialType => "Google";
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
@@ -29,7 +27,8 @@ namespace STSY.Identity.Google.Authenticators
                 return new AuthenticatorResult
                 {
                     Success = true,
-                    User = user
+                    User = user,
+                    NeedMfactor = true,
                 };
 
             }
