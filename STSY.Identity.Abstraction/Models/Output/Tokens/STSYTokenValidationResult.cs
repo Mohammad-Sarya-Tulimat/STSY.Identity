@@ -7,7 +7,7 @@
         public string ResourceType { get; set; }
         public bool IsAcepted(string id, string idType)
         {
-            return IsValid && string.Equals(id, id) && string.Equals(ResourceType, idType);
+            return IsValid && string.Equals(id, ResourceId) && string.Equals(ResourceType, idType);
         }
     }
 }

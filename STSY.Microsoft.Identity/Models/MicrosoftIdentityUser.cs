@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using STSY.Microsoft.Identity.Models;
 using System;
+using System.Collections.Generic;
 
 namespace STSY.Identity.Models
 {
@@ -12,6 +14,10 @@ namespace STSY.Identity.Models
 
         public DateTimeOffset SecurityChangeSessionExpiresAt { get; set; }
         public string? SecurityChangeSessionId { get; set; }
+
+        public IEnumerable<MicrosoftIdentityUserExternalLogin> UserExternalLogins { get; set; }
+        public IEnumerable<MicrosoftIdentityPasswordHistory> PasswordHistories { get; set; }
+        public IEnumerable<MicrosoftIdentityUserSession> UserSessions { get; set; }
 
         public bool IsStepUpEnabled(string sessionId)
         {

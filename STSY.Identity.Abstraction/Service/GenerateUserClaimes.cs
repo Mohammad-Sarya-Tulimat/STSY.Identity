@@ -14,12 +14,12 @@ namespace STSY.Identity.Abstraction.Service
         {
             _getUserClaims = getUserClaims;
         }
-        public async Task<List<Claim>> GetClaims(ExtendedUser user, string sessionId, CancellationToken cancellationToken = default)
+        public async Task<List<Claim>> GetClaims(UserData user, string sessionId, CancellationToken cancellationToken = default)
         {
             var cliems = new List<Claim>();
             foreach (var item in _getUserClaims ?? new List<IGetUserClaims>())
             {
-                cliems.AddRange(await item.GetUserClaimsAsync(user, cancellationToken));
+                cliems.AddRange(await item.GetUserClaimsAsync(user.Id, cancellationToken));
             }
             return cliems;
         }

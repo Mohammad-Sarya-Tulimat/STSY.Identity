@@ -9,5 +9,6 @@ namespace STSY.Microsoft.Identity.DBContext
     {
         public DbSet<MicrosoftIdentityPasswordHistory> PasswordHistories { get; set; }
         public DbSet<MicrosoftIdentityUserSession> UserSessions { get; set; }
+        public DbSet<MicrosoftIdentityUserExternalLogin> UserExternalLogins { get; set; }
     }
 }

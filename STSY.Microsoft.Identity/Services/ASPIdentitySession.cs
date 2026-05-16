@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
+using STSY.Identity.Abstraction.Contract.Models.Sessions;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Contract.Tokens;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,14 +22,20 @@ namespace STSY.Microsoft.Identity.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SignInManager<MicrosoftIdentityUser> _signInManager;
         private readonly UserManager<MicrosoftIdentityUser> _userManager;
-        public ASPIdentitySession(IHttpContextAccessor httpContextAccessor, SignInManager<MicrosoftIdentityUser> signInManager, UserManager<MicrosoftIdentityUser> userManager)
+        private readonly IGetUserClaims _generateUserClaims;
+        public ASPIdentitySession(
+            IHttpContextAccessor httpContextAccessor,
+            SignInManager<MicrosoftIdentityUser> signInManager,
+            UserManager<MicrosoftIdentityUser> userManager,
+            IGetUserClaims generateUserClaims)
         {
             this._httpContextAccessor = httpContextAccessor;
             this._signInManager = signInManager;
             this._userManager = userManager;
+            this._generateUserClaims = generateUserClaims;
         }
 
-        public async Task<SessionResult> CreateMFSessionAsync(ExtendedUser user, CancellationToken cancellationToken = default)
+        public async Task<SessionResult> CreateMFSessionAsync(UserData user, CancellationToken cancellationToken = default)
         {
             var principal = new ClaimsPrincipal(new ClaimsIdentity(new[]{
             new Claim(ClaimTypes.NameIdentifier, user.Id)}, IdentityConstants.TwoFactorUserIdScheme));
@@ -41,52 +50,68 @@ namespace STSY.Microsoft.Identity.Services
             };
         }
 
-        public async Task<bool> ValidateMFSessionAsync(ExtendedUser user, Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
+        public async Task<SessionValidateResult> ValidateMFSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
         {
-            var result = await _httpContextAccessor.HttpContext.AuthenticateAsync(IdentityConstants.TwoFactorUserIdScheme);
-            if (result.Succeeded)
+            var authResult = await _httpContextAccessor.HttpContext.AuthenticateAsync(IdentityConstants.TwoFactorUserIdScheme);
+            var result = new SessionValidateResult
             {
-                var userId = result.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.Equals(userId, user.Id))
-                {
-                    return true;
-                }
+                Success = authResult.Succeeded
+            };
+            if (authResult.Succeeded)
+            {
+                result.UserId = authResult.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             }
-            return false;
+            return result;
         }
-        public async Task<SessionResult> CreateSessionAsync(ExtendedUser user, CancellationToken cancellationToken = default)
+        public async Task<SessionResult> CreateSessionAsync(UserData user, CancellationToken cancellationToken = default)
         {
             await _httpContextAccessor.HttpContext.SignOutAsync(IdentityConstants.TwoFactorUserIdScheme);
             var dbuser = await _userManager.FindByIdAsync(user.Id);
             if (await _signInManager.CanSignInAsync(dbuser))
             {
-                await _signInManager.SignInAsync(dbuser, true);
-                return new SessionResult
-                {
-                    isSuccess = true,
-                    IsMfRequred = false,
-                    Message = "Singin done"
-                };
+                return await this.GetNewSessionResult(dbuser, System.Guid.NewGuid().ToString(), cancellationToken);
             }
             throw new AuthenticatorException("cannot Signin");
         }
-
-        public async Task<SessionResult> RefreshSessionAsync(ExtendedUser user, Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
+        public async Task<SessionResult> RefreshSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
         {
-            var dbuser = await _userManager.FindByIdAsync(user.Id);
-            await _signInManager.RefreshSignInAsync(dbuser);
+            var validateResult = await ValidateSessionAsync(dataToValidate, cancellationToken);
+            if (validateResult.Success)
+            {
+                var user = await _userManager.FindByIdAsync(validateResult.UserId);
+                await _signInManager.SignOutAsync();
+                return await this.GetNewSessionResult(user, validateResult.SessionId, cancellationToken);
+            }
+            throw new AuthenticatorException("Invalid session");
+        }
+
+        public async Task<SessionValidateResult> ValidateSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
+        {
+            var claimuser = _httpContextAccessor.HttpContext?.User;
+            var isSignedIn = _signInManager.IsSignedIn(claimuser);
+            var result = new SessionValidateResult
+            {
+                Success = isSignedIn,
+            };
+            if (isSignedIn)
+            {
+                result.UserId = claimuser.FindFirstValue("UserID");
+                result.SessionId = claimuser.FindFirstValue(ClaimValueTypes.Sid);
+            }
+            return result;
+        }
+        private async Task<SessionResult> GetNewSessionResult(MicrosoftIdentityUser user, string sessionId, CancellationToken cancellationToken = default)
+        {
+            var cliems = (await this._generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken)).ToList();
+            cliems.Add(new Claim(ClaimValueTypes.Sid, sessionId));
+            cliems.Add(new Claim("UserID", user.Id));
+            await _signInManager.SignInWithClaimsAsync(user, true, cliems);
             return new SessionResult
             {
                 isSuccess = true,
-                Message = "Session refreshed",
-                IsMfRequred = false
+                IsMfRequred = false,
+                Message = "Singin done"
             };
-        }
-
-        public async Task<bool> ValidateSessionAsync(ExtendedUser user, Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
-        {
-            var claimuser = _httpContextAccessor.HttpContext?.User;
-            return _signInManager.IsSignedIn(claimuser) && string.Equals(claimuser.Identity.Name, user.UserName, System.StringComparison.OrdinalIgnoreCase);
         }
     }
 }

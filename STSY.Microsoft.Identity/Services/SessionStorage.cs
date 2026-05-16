@@ -35,19 +35,17 @@ namespace STSY.Microsoft.Identity.Services
             return STSYIdentityResult.SuccessResult;
         }
 
-        public async Task<UserSession> GetSession(string userId, string sessionId, CancellationToken cancellationToken)
+        public async Task<UserSession> GetSession(string sessionId, CancellationToken cancellationToken)
         {
             var session = await this._dbcontext.UserSessions.FindAsync(sessionId);
             if (session == null) return null;
-            if (!string.Equals(session.UserId, userId)) return null;
             return session.AsUserSession();
         }
 
-        public async Task<IDictionary<string, object>> GetSessionProtectedData(string userId, string sessionId, CancellationToken cancellationToken)
+        public async Task<IDictionary<string, object>> GetSessionProtectedData(string sessionId, CancellationToken cancellationToken)
         {
             var session = await this._dbcontext.UserSessions.FindAsync(sessionId);
             if (session == null) return null;
-            if (!string.Equals(session.UserId, userId)) return null;
             return session.ProtectedData;
         }
 

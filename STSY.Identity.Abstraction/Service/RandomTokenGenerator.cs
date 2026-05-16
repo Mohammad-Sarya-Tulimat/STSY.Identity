@@ -16,7 +16,7 @@ namespace STSY.Identity.Abstraction.Service
         {
             _randomRefreshTokenOption = randomRefreshTokenOption;
         }
-        public async Task<TokenData> GenerateRefreshToken(ExtendedUser userData)
+        public async Task<TokenData> GenerateRefreshToken(UserData userData)
         {
             using (var rng = RandomNumberGenerator.Create())
             {

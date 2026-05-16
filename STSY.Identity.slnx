@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="STSY.Identity.Abstraction/STSY.Identity.Abstraction.csproj" />
   <Project Path="STSY.Identity.API/STSY.Identity.API.csproj" Id="544204aa-05fe-412e-9aff-8ba254df0369" />
+  <Project Path="STSY.Identity.Google/STSY.Identity.Google.csproj" Id="7675945e-082c-4aa1-9592-fc11626c8a56" />
   <Project Path="STSY.Identity.JWT/STSY.Identity.JWT.csproj" Id="3448bb7e-21ae-4a25-a057-efe7c2f97e55" />
   <Project Path="STSY.Microsoft.Identity/STSY.Microsoft.Identity.csproj" />
 </Solution>

@@ -1,4 +1,5 @@
-﻿using STSY.Identity.Abstraction.Contract.Authentication;
+﻿using STSY.Identity.Abstraction.Contract;
+using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Contract.Models.Sessions;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
@@ -23,17 +24,20 @@ namespace STSY.Identity.Abstraction.Service
         private readonly IMFTokenGenerator _mFTokenGenerator;
         private readonly ISessionStorage _sessionStorage;
         private readonly IGetUserClaims _generateUserClaims;
+        private readonly IReadUsers _readUsers;
         public StanderSessionCreator(
             IAccessTokenGenerator accessTokenGenerator,
             IRefreshTokenGenerator refreshTokenGenerator,
             IMFTokenGenerator mFTokenGenerator,
             ISessionStorage sessionManager,
-            IGetUserClaims generateUserClaims)
+            IGetUserClaims generateUserClaims,
+            IReadUsers readUsers)
         {
             _accessTokenGenerator = accessTokenGenerator;
             _refreshTokenGenerator = refreshTokenGenerator;
             _mFTokenGenerator = mFTokenGenerator;
             _sessionStorage = sessionManager;
+            _readUsers = readUsers;
         }
         private string HashRefresh(string refreshToken)
         {
@@ -51,13 +55,12 @@ namespace STSY.Identity.Abstraction.Service
             result[RefreshTokenKey] = HashRefresh(refreshToken);
             return result;
         }
-        public async Task<SessionResult> CreateSessionAsync(ExtendedUser user, CancellationToken cancellationToken = default)
+        public async Task<SessionResult> CreateSessionAsync(UserData user, CancellationToken cancellationToken = default)
         {
             string sessionId = Guid.NewGuid().ToString();
             Dictionary<string, object> tokenDatas = new Dictionary<string, object>();
-            var cliems = await _generateUserClaims.GetUserClaimsAsync(user, cancellationToken);
+            var cliems = await _generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken);
             var refreshToen = await _refreshTokenGenerator.GenerateRefreshToken(user);
-
             tokenDatas["accessToken"] = await _accessTokenGenerator.GenerateAccessToken(user.Id, nameof(UserData), cliems.ToList());
             tokenDatas[RefreshTokenKey] = refreshToen;
             tokenDatas[SessionIdKey] = sessionId;
@@ -68,7 +71,6 @@ namespace STSY.Identity.Abstraction.Service
                 CreatedAt = DateTimeOffset.UtcNow,
                 ExpiredAt = refreshToen.Expiration,
                 SessionType = "StanderSession",
-
             };
             await _sessionStorage.AddSession(user.Id, userSession, ToSave(refreshToen.Token), cancellationToken);
             return new SessionResult
@@ -80,15 +82,31 @@ namespace STSY.Identity.Abstraction.Service
             };
         }
 
-        public async Task<SessionResult> RefreshSessionAsync(ExtendedUser user, Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
+        public async Task<SessionResult> CreateMFSessionAsync(UserData user, CancellationToken cancellationToken = default)
+        {
+            Dictionary<string, object> result = new Dictionary<string, object>();
+            result[MFATokenKey] = await _mFTokenGenerator.GenerateMFAToken(user.Id, nameof(UserData));
+            return new SessionResult
+            {
+                isSuccess = true,
+                IsMfRequred = true,
+                Message = "MFA token generated successfully",
+                SessionData = result
+            };
+        }
+
+
+        public async Task<SessionResult> RefreshSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
         {
             var sessionId = dataToValidate[SessionIdKey].ToString();
-            if (!await ValidateSessionAsync(user, dataToValidate, cancellationToken))
+            var validate = await this.ValidateSessionAsync(dataToValidate, cancellationToken);
+            if (!validate.Success)
             {
                 throw new UnauthorizedAccessException("Invalid session");
             }
+            var user = await _readUsers.GetUserByIdAsync(validate.UserId, cancellationToken);
             Dictionary<string, object> tokenDatas = new Dictionary<string, object>();
-            var cliems = await _generateUserClaims.GetUserClaimsAsync(user, cancellationToken);
+            var cliems = await _generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken);
             var refreshToen = await _refreshTokenGenerator.GenerateRefreshToken(user);
             tokenDatas["accessToken"] = await _accessTokenGenerator.GenerateAccessToken(user.Id, nameof(UserData), cliems.ToList());
             tokenDatas[RefreshTokenKey] = refreshToen;
@@ -109,35 +127,27 @@ namespace STSY.Identity.Abstraction.Service
                 SessionData = tokenDatas
             };
         }
-        public async Task<bool> ValidateSessionAsync(ExtendedUser user, Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
+        public async Task<SessionValidateResult> ValidateSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
         {
             var sessionId = dataToValidate[SessionIdKey].ToString();
-            var oldaDb = await _sessionStorage.GetSessionProtectedData(user.Id, sessionId, cancellationToken);
-            if (oldaDb == null) return false;
+            var oldaDb = await _sessionStorage.GetSession(sessionId, cancellationToken);
+            if (oldaDb == null) return new SessionValidateResult { Success = false };
+            var dbData = await _sessionStorage.GetSessionProtectedData(sessionId, cancellationToken);
             var oldInput = dataToValidate[RefreshTokenKey]?.ToString();
-            var oldDbToken = oldaDb[RefreshTokenKey]?.ToString();
-            if (!oldDbToken.Equals(HashRefresh(oldInput))) return false;
-            return true;
+            var oldDbToken = dbData[RefreshTokenKey]?.ToString();
+            if (!oldDbToken.Equals(HashRefresh(oldInput))) return new SessionValidateResult { Success = false };
+            return new SessionValidateResult { Success = true, SessionId = sessionId, UserId = oldaDb.UserId };
         }
-
-        public async Task<SessionResult> CreateMFSessionAsync(ExtendedUser user, CancellationToken cancellationToken = default)
-        {
-            Dictionary<string, object> result = new Dictionary<string, object>();
-            result[MFATokenKey] = await _mFTokenGenerator.GenerateMFAToken(user.Id, nameof(UserData));
-            return new SessionResult
-            {
-                isSuccess = true,
-                IsMfRequred = true,
-                Message = "MFA token generated successfully",
-                SessionData = result
-            };
-        }
-        public async Task<bool> ValidateMFSessionAsync(ExtendedUser user, Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
+        public async Task<SessionValidateResult> ValidateMFSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default)
         {
             var oldInput = dataToValidate[MFATokenKey]?.ToString();
             var validateMfaToken = await _mFTokenGenerator.ValidateMFAToken(oldInput);
-            if (validateMfaToken.IsAcepted(user.Id, nameof(UserData))) return false;
-            return true;
+            return new SessionValidateResult
+            {
+                Success = validateMfaToken.IsValid,
+                UserId = validateMfaToken.ResourceId,
+                SessionId = null
+            };
         }
     }
 }

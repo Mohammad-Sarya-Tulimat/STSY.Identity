@@ -2,32 +2,16 @@
 using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Models;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace STSY.Microsoft.Identity.Mappers
 {
     public static class UserMapper
     {
-        public static ExtendedUser ToExtendedUser(this MicrosoftIdentityUser user, List<string> roles)
-        {
-            return new ExtendedUser
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                IsEmailConfirmed = user.EmailConfirmed,
-                CreatedAt = user.CreatedAt,
-                IsPhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber,
-                Roles = roles
-            };
-        }
 
         public static UserData ToUserData(this MicrosoftIdentityUser user)
         {
+            if (user == null) return null;
             return new UserData
             {
                 Id = user.Id,

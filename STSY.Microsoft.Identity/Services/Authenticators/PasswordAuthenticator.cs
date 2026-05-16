@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Authentication;
-using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Models.Enums;
 using STSY.Identity.Models;
+using STSY.Microsoft.Identity.Mappers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,13 +22,19 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         public string CredentialType => CredentialTypeValue;
         public AuthenticatorUsage Usage => AuthenticatorUsage.Primary;
 
-        public async Task<bool> ValidateCredentialAsync(UserData userData, Dictionary<string, object> credentials)
+        public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
-            if (userData == null) throw new ArgumentNullException(nameof(userData), "user data cannot be null");
             if (credentials == null || !credentials.ContainsKey(CredentialKeys.PASSWORD_KEY)) throw new ArgumentNullException(nameof(credentials), "password required");
-            var user = await _userManager.FindByIdAsync(userData.Id);
-            if (user == null) return false;
-            return await _userManager.CheckPasswordAsync(user, credentials[CredentialKeys.PASSWORD_KEY].ToString());
+            if (credentials == null || !credentials.ContainsKey(CredentialKeys.EMAIL_OR_USERNAME_KEY)) throw new ArgumentNullException(nameof(credentials), "email required");
+            var userName = credentials[CredentialKeys.EMAIL_OR_USERNAME_KEY].ToString();
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null) user = await _userManager.FindByEmailAsync(userName);
+            var isValid = await _userManager.CheckPasswordAsync(user, credentials[CredentialKeys.PASSWORD_KEY].ToString());
+            return new AuthenticatorResult
+            {
+                Success = isValid,
+                User = user.ToUserData()
+            };
         }
     }
 }

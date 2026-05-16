@@ -2,6 +2,7 @@
 using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
+using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Enums;
 using STSY.Identity.Abstraction.Models.Output;
@@ -27,19 +28,15 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             _userManager = userManager;
             _signInManager = signInManager;
         }
-        public async Task<bool> ValidateCredentialAsync(UserData userData, Dictionary<string, object> credentials)
+        public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
-            if (userData == null) throw new ArgumentNullException(nameof(userData), "user data cannot be null");
             if (credentials == null || !credentials.ContainsKey(CredentialKeys.PASSWORD_KEY)) throw new AuthenticatorException("credentials is required.");
             var userKey = await _signInManager.PerformPasskeyAssertionAsync(credentials[CredentialKeys.PASSKEY_KEY].ToString());
-            if (userKey.Succeeded)
+            return new AuthenticatorResult
             {
-                if (userData.Id == userData.Id)
-                {
-                    return true;
-                }
-            }
-            return false;
+                Success = userKey.Succeeded,
+                User = userKey.User.ToUserData(),
+            };
         }
         public async Task<AuthInitiateResult> InitiateAsync(UserData user)
         {

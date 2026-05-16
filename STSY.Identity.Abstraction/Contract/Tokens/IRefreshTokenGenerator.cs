@@ -6,6 +6,6 @@ namespace STSY.Identity.Abstraction.Contract.Tokens
 {
     public interface IRefreshTokenGenerator
     {
-        Task<TokenData> GenerateRefreshToken(ExtendedUser userData);
+        Task<TokenData> GenerateRefreshToken(UserData userData);
     }
 }

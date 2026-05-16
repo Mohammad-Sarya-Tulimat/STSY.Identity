@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using STSY.Identity.Abstraction.Contract;
-using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.DBContext;
@@ -22,36 +22,37 @@ namespace STSY.Microsoft.Identity.Services
             _userManager = userManager;
             _sTSYIdentityDbContext = sTSYIdentityDbContext;
         }
-        public async Task<ExtendedUser> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<UserData> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return null;
-            var roles = await _userManager.GetRolesAsync(user);
-            return user.ToExtendedUser(roles.ToList());
+            return user.ToUserData();
         }
 
-        public async Task<ExtendedUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail, CancellationToken cancellationToken = default)
+        public async Task<UserData> GetUserByUserNameOrEmailAsync(string userNameOrEmail, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByNameAsync(userNameOrEmail);
             if (user == null)
                 user = await _userManager.FindByEmailAsync(userNameOrEmail);
             if (user == null)
                 return null;
-            var roles = await _userManager.GetRolesAsync(user);
-            return user.ToExtendedUser(roles.ToList());
+            return user.ToUserData();
         }
 
-        public async Task<IEnumerable<UserPassKey>> GetUserPassKeyAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<UserData> GetUserByLinkedAccountsIdAsync(string provider, string providerUserId, CancellationToken cancellationToken = default)
         {
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return null;
-            var userPasskeys = await _userManager.GetPasskeysAsync(user);
-            return userPasskeys.Select(s => s.ToUserPassKey());
+            var user = await _sTSYIdentityDbContext.UserExternalLogins.Where(x =>
+            string.Equals(x.ProviderUserId, providerUserId)
+            && string.Equals(x.Provider, provider)
+            ).Select(x => x.User).FirstOrDefaultAsync(cancellationToken);
+            if (user == null) return null;
+            return user.ToUserData();
         }
-
+        public async Task<IEnumerable<string>> GetUserLinkedAccountsAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            return await _sTSYIdentityDbContext.UserExternalLogins.Where(x => x.UserId == userId).Select(x => x.Provider).ToListAsync(cancellationToken);
+        }
         public async Task<IQueryable<UserData>> GetUsersAsync(Expression<Func<UserData, bool>> expression)
         {
             var users = _userManager.Users.AsUserData();
