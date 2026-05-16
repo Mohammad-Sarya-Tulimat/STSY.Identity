@@ -10,6 +10,6 @@ namespace STSY.Microsoft.Identity.Models
         public MicrosoftIdentityUser User { get; set; }
         public string Provider { get; set; }
         public string ProviderUserId { get; set; }
-        public DateTime LinkedAt { get; set; }
+        public DateTimeOffset LinkedAt { get; set; }
     }
 }

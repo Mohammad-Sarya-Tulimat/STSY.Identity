@@ -15,9 +15,9 @@ namespace STSY.Identity.Models
         public DateTimeOffset SecurityChangeSessionExpiresAt { get; set; }
         public string? SecurityChangeSessionId { get; set; }
 
-        public IEnumerable<MicrosoftIdentityUserExternalLogin> UserExternalLogins { get; set; }
-        public IEnumerable<MicrosoftIdentityPasswordHistory> PasswordHistories { get; set; }
-        public IEnumerable<MicrosoftIdentityUserSession> UserSessions { get; set; }
+        public List<MicrosoftIdentityUserExternalLogin> UserExternalLogins { get; set; }
+        public List<MicrosoftIdentityPasswordHistory> PasswordHistories { get; set; }
+        public List<MicrosoftIdentityUserSession> UserSessions { get; set; }
 
         public bool IsStepUpEnabled(string sessionId)
         {

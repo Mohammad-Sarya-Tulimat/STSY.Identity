@@ -16,7 +16,9 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <returns></returns>       
         /// /// <exception cref="System.ArgumentNullException"></exception>   
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
-        Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default);
+
+        Task<STSYIdentityResult> CreateUser(ExternalUserCreateInput input, CancellationToken cancellationToken = default);
 
 
         /// <summary>

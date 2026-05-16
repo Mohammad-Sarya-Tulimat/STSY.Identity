@@ -5,6 +5,7 @@ using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.Mappers;
+using STSY.Microsoft.Identity.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace STSY.Microsoft.Identity.Services
             var result = await _userManager.AddToRoleAsync(user, role);
             return result.AsSTSYIdentityResult();
         }
-        public async Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -50,6 +51,30 @@ namespace STSY.Microsoft.Identity.Services
             }
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+
+
+        public async Task<STSYIdentityResult> CreateUser(ExternalUserCreateInput input, CancellationToken cancellationToken = default)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            var user = new MicrosoftIdentityUser
+            {
+                UserName = input.UserName,
+                Email = input.Email,
+                FirstName = input.FirstName,
+                LastName = input.LastName,
+                PhoneNumber = input.PhoneNumber,
+                LockoutEnabled = true,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UserExternalLogins = new List<MicrosoftIdentityUserExternalLogin>() {
+                    new MicrosoftIdentityUserExternalLogin {
+                        LinkedAt=DateTimeOffset.UtcNow,
+                        Provider=input.Provider,
+                        ProviderUserId=input.ProviderId}
+              }
+            };
+            var result = await _userManager.CreateAsync(user);
+            return result.AsSTSYIdentityResult();
         }
         public async Task<bool> IsStepUpEnabled(string userId, string sessionId, CancellationToken cancellationToken)
         {
@@ -279,7 +304,6 @@ namespace STSY.Microsoft.Identity.Services
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
-
 
         #endregion
     }
