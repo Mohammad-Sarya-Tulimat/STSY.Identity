@@ -8,4 +8,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\STSY.Identity.Abstraction\STSY.Identity.Abstraction.csproj" />
+  </ItemGroup>
+
 </Project>

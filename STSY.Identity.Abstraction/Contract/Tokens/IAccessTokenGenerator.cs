@@ -9,6 +9,6 @@ namespace STSY.Identity.Abstraction.Contract.Tokens
     {
         Task<TokenData> GenerateAccessToken(string id, string idType, List<Claim> claim);
 
-        Task<TokenValidationResult> ValidateAccessToken(string token);
+        Task<STSYTokenValidationResult> ValidateAccessToken(string token);
     }
 }
