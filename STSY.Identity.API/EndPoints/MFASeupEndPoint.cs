@@ -11,7 +11,7 @@ namespace STSY.Identity.API.EndPoints
 {
     public static class MFASeupEndPoint
     {
-        public static IEndpointRouteBuilder MapMFASeupApis(this IEndpointRouteBuilder app, string prefix)
+        public static IEndpointRouteBuilder MapSTSYMFASeupApis(this IEndpointRouteBuilder app, string prefix)
         {
             app.MapPost($"{prefix}/mfa/change-recovery-codes", async (
             [FromServices] ITwoFactorManager twoFactorManager,
@@ -30,15 +30,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { ex.Message });
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(new { ex.Message });
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
             }).RequireAuthorization();
 
@@ -61,15 +61,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { ex.Message });
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(new { ex.Message });
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
             }).RequireAuthorization();
 
@@ -87,15 +87,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { ex.Message });
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(new { ex.Message });
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
             }).RequireAuthorization();
 

@@ -44,6 +44,7 @@ namespace STSY.Identity.Abstraction.Service
                 }
                 else
                 {
+                    await _userManager.ResetLock(user.Id, cancellationToken);
                     return await _sessionCreator.CreateSessionAsync(user, cancellationToken);
                 }
             }
@@ -64,6 +65,7 @@ namespace STSY.Identity.Abstraction.Service
             var isValid = await authenticator.ValidateCredentialAsync(user, loginInput.Credentials);
             if (isValid)
             {
+                await _userManager.ResetLock(user.Id, cancellationToken);
                 return await _sessionCreator.CreateSessionAsync(user, cancellationToken);
             }
             await _userManager.AccessFailedAsync(user.Id, cancellationToken);

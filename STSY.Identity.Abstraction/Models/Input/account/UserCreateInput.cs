@@ -1,4 +1,4 @@
-﻿namespace STSY.Identity.Abstraction.Models.Input
+﻿namespace STSY.Identity.Abstraction.Models.Input.account
 {
     public class UserCreateInput
     {

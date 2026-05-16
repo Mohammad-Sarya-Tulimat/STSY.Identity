@@ -9,7 +9,7 @@ namespace STSY.Identity.API.EndPoints
 {
     public static class LoginEndPoint
     {
-        public static IEndpointRouteBuilder MapLoginEndPoint(this IEndpointRouteBuilder app, string prefix)
+        public static IEndpointRouteBuilder MapSTSYLoginEndPoint(this IEndpointRouteBuilder app, string prefix)
         {
             app.MapPost($"{prefix}/auth/challenge", async ([FromBody] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
             {
@@ -20,7 +20,7 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(ex.Message);
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (AuthenticatorException ex)
                 {
@@ -32,15 +32,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(ex.Message);
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(ex.Message);
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError("error while generate challenge");
+                    return Results.InternalServerError("error while generate challenge".AsResult());
                 }
             }).AllowAnonymous();
 
@@ -53,7 +53,7 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(ex.Message);
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (AuthenticatorException ex)
                 {
@@ -65,15 +65,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(ex.Message);
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(ex.Message);
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError("error while processing  login");
+                    return Results.InternalServerError("error while processing  login".AsResult());
                 }
             }).AllowAnonymous();
             app.MapPost($"{prefix}/auth/mfa_login", async ([FromBody] LoginInput request, [FromServices] STSYLogin login, CancellationToken token = default) =>
@@ -85,7 +85,7 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(ex.Message);
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (AuthenticatorException ex)
                 {
@@ -97,15 +97,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(ex.Message);
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(ex.Message);
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError("error while processing MFA login");
+                    return Results.InternalServerError("error while processing MFA login".AsResult());
                 }
             }).AllowAnonymous();
             return app;

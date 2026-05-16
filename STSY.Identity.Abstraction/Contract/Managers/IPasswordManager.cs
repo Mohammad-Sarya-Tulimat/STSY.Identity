@@ -27,7 +27,7 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <exception cref="System.ArgumentNullException"></exception>  
         /// <exception cref="Exeptions.ResourceNotFoundException"></exception>" 
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
-        Task<STSYIdentityResult> ResetPassword(string userId, string resetToken, string newPassword, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> ResetPasswordAsync(string userId, string resetToken, string newPassword, CancellationToken cancellationToken);
         /// <summary>
         /// 
         /// </summary>
@@ -39,6 +39,6 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <exception cref="System.ArgumentNullException"></exception>  
         /// <exception cref="Exeptions.ResourceNotFoundException"></exception>"
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>"  
-        Task<STSYIdentityResult> ChangeUserPassword(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> ChangeUserPasswordAsync(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken);
     }
 }

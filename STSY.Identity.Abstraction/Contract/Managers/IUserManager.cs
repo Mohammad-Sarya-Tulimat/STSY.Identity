@@ -1,4 +1,4 @@
-﻿using STSY.Identity.Abstraction.Models.Input;
+﻿using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using System;
 using System.Threading;
@@ -71,6 +71,8 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         Task<bool> IsMFAEnabled(string userId, CancellationToken cancellationToken);
 
         Task<bool> IsLocked(string userId, CancellationToken cancellationToken);
+
+        Task<STSYIdentityResult> ResetLock(string userId, CancellationToken cancellationToken);
         Task<STSYIdentityResult> AccessFailedAsync(string userId, CancellationToken cancellationToken);
 
     }

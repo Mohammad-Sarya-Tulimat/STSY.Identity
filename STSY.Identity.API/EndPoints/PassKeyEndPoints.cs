@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Routing;
 using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
+using STSY.Identity.API;
 
 namespace STSY.Microsoft.Identity.EndPoints
 {
     public static class PassKeyEndPoints
     {
-        public static IEndpointRouteBuilder MapPassKeyApis(this IEndpointRouteBuilder app, string prefix)
+        public static IEndpointRouteBuilder MapSTSYPassKeyApis(this IEndpointRouteBuilder app, string prefix)
         {
 
             app.MapPost($"{prefix}/passkey/createOption", async (
@@ -33,15 +34,15 @@ namespace STSY.Microsoft.Identity.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { ex.Message });
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(new { ex.Message });
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
             }).RequireAuthorization();
 
@@ -69,15 +70,15 @@ namespace STSY.Microsoft.Identity.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { ex.Message });
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(new { ex.Message });
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
             }).RequireAuthorization();
 
@@ -111,15 +112,15 @@ namespace STSY.Microsoft.Identity.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { ex.Message });
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(new { ex.Message });
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
             }).RequireAuthorization();
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
-using STSY.Identity.Abstraction.Models.Input;
+using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.Mappers;
@@ -41,7 +41,9 @@ namespace STSY.Microsoft.Identity.Services
                     Email = input.Email,
                     FirstName = input.FirstName,
                     LastName = input.LastName,
-                    PhoneNumber = input.PhoneNumber
+                    PhoneNumber = input.PhoneNumber,
+                    LockoutEnabled = true,
+                    CreatedAt = DateTimeOffset.UtcNow
                 };
                 var result = await _userManager.CreateAsync(user, input.Password);
                 return result.AsSTSYIdentityResult();
@@ -121,6 +123,20 @@ namespace STSY.Microsoft.Identity.Services
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
+        public async Task<STSYIdentityResult> ResetLock(string userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (userId == null) throw new ArgumentNullException(nameof(userId));
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), userId, "User not found.");
+                var result = await _userManager.ResetAccessFailedCountAsync(user);
+                return result.AsSTSYIdentityResult();
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
 
         public async Task<STSYIdentityResult> AccessFailedAsync(string userId, CancellationToken cancellationToken)
         {
@@ -137,7 +153,7 @@ namespace STSY.Microsoft.Identity.Services
         }
         #endregion
         #region IPasswordManager
-        public async Task<STSYIdentityResult> ChangeUserPassword(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> ChangeUserPasswordAsync(string userId, string newpassword, string oldpassword, CancellationToken cancellationToken)
         {
             try
             {
@@ -167,7 +183,7 @@ namespace STSY.Microsoft.Identity.Services
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
-        public async Task<STSYIdentityResult> ResetPassword(string userId, string resetToken, string newPassword, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> ResetPasswordAsync(string userId, string resetToken, string newPassword, CancellationToken cancellationToken)
         {
             try
             {
