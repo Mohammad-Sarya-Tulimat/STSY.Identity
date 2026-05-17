@@ -42,6 +42,7 @@ namespace STSY.Microsoft.Identity.Services
                     Email = input.Email,
                     FirstName = input.FirstName,
                     LastName = input.LastName,
+                    DateOfBirth = input.DateOfBirth,
                     PhoneNumber = input.PhoneNumber,
                     LockoutEnabled = true,
                     CreatedAt = DateTimeOffset.UtcNow
@@ -66,6 +67,7 @@ namespace STSY.Microsoft.Identity.Services
                 PhoneNumber = input.PhoneNumber,
                 LockoutEnabled = true,
                 CreatedAt = DateTimeOffset.UtcNow,
+                DateOfBirth = input.DateOfBirth,
                 UserExternalLogins = new List<MicrosoftIdentityUserExternalLogin>() {
                     new MicrosoftIdentityUserExternalLogin {
                         LinkedAt=DateTimeOffset.UtcNow,
@@ -236,8 +238,7 @@ namespace STSY.Microsoft.Identity.Services
                 bool hasEmail = await _userManager.IsEmailConfirmedAsync(user);
                 bool hasPhone = await _userManager.IsPhoneNumberConfirmedAsync(user);
                 bool hasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
-                bool hasCode = (await _userManager.CountRecoveryCodesAsync(user)) != 0;
-                if (hasEmail || hasPhone || hasAuthenticator || hasCode)
+                if (hasEmail || hasPhone || hasAuthenticator)
                 {
                     await _userManager.SetTwoFactorEnabledAsync(user, enabled);
                 }
@@ -252,8 +253,7 @@ namespace STSY.Microsoft.Identity.Services
         {
             bool hasEmail = await _userManager.IsEmailConfirmedAsync(user);
             bool hasPhone = await _userManager.IsPhoneNumberConfirmedAsync(user);
-            bool hasCode = await _userManager.CountRecoveryCodesAsync(user) != 0;
-            if (!(hasEmail || hasPhone || hasCode))
+            if (!(hasEmail || hasPhone))
             {
                 await _userManager.SetTwoFactorEnabledAsync(user, false);
             }

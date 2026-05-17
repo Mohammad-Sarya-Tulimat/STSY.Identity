@@ -20,6 +20,8 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         public const string CredentialTypeValue = "Password";
         public string CredentialType => CredentialTypeValue;
 
+        public bool AllowStepUp => true;
+
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
             if (credentials == null || !credentials.ContainsKey(CredentialKeys.PASSWORD_KEY)) throw new ArgumentNullException(nameof(credentials), "password required");

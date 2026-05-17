@@ -14,7 +14,7 @@ namespace STSY.Identity.Models
 
         public DateTimeOffset SecurityChangeSessionExpiresAt { get; set; }
         public string? SecurityChangeSessionId { get; set; }
-
+        public DateTime DateOfBirth { get; set; }
         public List<MicrosoftIdentityUserExternalLogin> UserExternalLogins { get; set; }
         public List<MicrosoftIdentityPasswordHistory> PasswordHistories { get; set; }
         public List<MicrosoftIdentityUserSession> UserSessions { get; set; }

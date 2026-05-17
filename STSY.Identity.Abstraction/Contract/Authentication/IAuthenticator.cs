@@ -7,6 +7,7 @@ namespace STSY.Identity.Abstraction.Contract.Authentication
     public interface IAuthenticator
     {
         string CredentialType { get; }
+        bool AllowStepUp { get; }
         Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials);
     }
     public interface IMFAuthenticator

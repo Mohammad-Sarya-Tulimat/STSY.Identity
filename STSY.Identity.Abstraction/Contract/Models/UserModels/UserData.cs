@@ -10,6 +10,7 @@ namespace STSY.Identity.Abstraction.Contract.Models.UserModels
         public string UserName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public DateTime DateOfBirth { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool IsEmailConfirmed { get; set; }
         public bool IsPhoneNumberConfirmed { get; set; }

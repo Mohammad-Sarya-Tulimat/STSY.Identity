@@ -17,6 +17,7 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
     {
         public const string CredentialTypeValue = "PassKey";
         public string CredentialType => CredentialTypeValue;
+        public bool AllowStepUp => true;
         UserManager<MicrosoftIdentityUser> _userManager;
         SignInManager<MicrosoftIdentityUser> _signInManager;
         public PassKeyAuthenticator(UserManager<MicrosoftIdentityUser> userManager, SignInManager<MicrosoftIdentityUser> signInManager)

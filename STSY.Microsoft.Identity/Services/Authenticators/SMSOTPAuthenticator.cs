@@ -22,12 +22,10 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         private readonly ISendChallengeTokens _sendChallengeTokens;
 
         UserManager<MicrosoftIdentityUser> _userManager;
-        ISessionManager _sessionManager;
-        public SMSOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager, ISendChallengeTokens sendChallengeTokens, ISessionManager sessionManager)
+        public SMSOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager, ISendChallengeTokens sendChallengeTokens)
         {
             _userManager = userManager;
             _sendChallengeTokens = sendChallengeTokens;
-            _sessionManager = sessionManager;
         }
         public async Task<AuthInitiateResult> InitiateAsync(UserData user)
         {

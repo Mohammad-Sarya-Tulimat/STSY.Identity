@@ -1,5 +1,6 @@
 ﻿using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Authentication;
+using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Contract.Models.Sessions;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
@@ -8,6 +9,7 @@ using STSY.Identity.Abstraction.Models.Output;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,6 +40,7 @@ namespace STSY.Identity.Abstraction.Service
             _mFTokenGenerator = mFTokenGenerator;
             _sessionStorage = sessionManager;
             _readUsers = readUsers;
+            _generateUserClaims = generateUserClaims;
         }
         private string HashRefresh(string refreshToken)
         {
@@ -59,9 +62,11 @@ namespace STSY.Identity.Abstraction.Service
         {
             string sessionId = Guid.NewGuid().ToString();
             Dictionary<string, object> tokenDatas = new Dictionary<string, object>();
-            var cliems = await _generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken);
+            var cliems = (await _generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken)).ToList();
+            if (cliems.Any(s => s.Type.Equals(ClaimTypes.Sid))) throw new AuthenticatorException("You cannot use ClaimTypes.Sid in claim it is needed by framework");
+            cliems.Add(new System.Security.Claims.Claim(ClaimTypes.Sid, sessionId));
             var refreshToen = await _refreshTokenGenerator.GenerateRefreshToken(user);
-            tokenDatas["accessToken"] = await _accessTokenGenerator.GenerateAccessToken(user.Id, nameof(UserData), cliems.ToList());
+            tokenDatas["accessToken"] = await _accessTokenGenerator.GenerateAccessToken(user.Id, nameof(UserData), cliems);
             tokenDatas[RefreshTokenKey] = refreshToen;
             tokenDatas[SessionIdKey] = sessionId;
             var userSession = new UserSession

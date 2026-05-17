@@ -1,6 +1,10 @@
 <Solution>
+  <Folder Name="/Example/">
+    <Project Path="Example/STSY.Identity.Example/STSY.Identity.Example.csproj" Id="a6540e2e-70a4-40c3-b734-b03caff112c3" />
+  </Folder>
   <Project Path="STSY.Identity.Abstraction/STSY.Identity.Abstraction.csproj" />
   <Project Path="STSY.Identity.API/STSY.Identity.API.csproj" Id="544204aa-05fe-412e-9aff-8ba254df0369" />
+  <Project Path="STSY.Identity.Facebook/STSY.Identity.Facebook.csproj" Id="00d1b5dd-0685-4e34-b053-d2df7b734d99" />
   <Project Path="STSY.Identity.Google/STSY.Identity.Google.csproj" Id="7675945e-082c-4aa1-9592-fc11626c8a56" />
   <Project Path="STSY.Identity.JWT/STSY.Identity.JWT.csproj" Id="3448bb7e-21ae-4a25-a057-efe7c2f97e55" />
   <Project Path="STSY.Microsoft.Identity/STSY.Microsoft.Identity.csproj" />

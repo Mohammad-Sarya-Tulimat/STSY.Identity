@@ -1,0 +1,6 @@
+@STSY.Identity.Example_HostAddress = http://localhost:5274
+
+GET {{STSY.Identity.Example_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

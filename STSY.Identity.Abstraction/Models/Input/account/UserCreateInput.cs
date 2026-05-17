@@ -1,4 +1,6 @@
-﻿namespace STSY.Identity.Abstraction.Models.Input.account
+﻿using System;
+
+namespace STSY.Identity.Abstraction.Models.Input.account
 {
     public class UserCreateInput
     {
@@ -8,5 +10,6 @@
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string Password { get; set; }
+        public DateTime DateOfBirth { get; set; }
     }
 }

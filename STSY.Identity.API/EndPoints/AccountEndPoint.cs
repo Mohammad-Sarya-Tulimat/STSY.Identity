@@ -7,6 +7,8 @@ using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Models.Input.account;
+using STSY.Identity.Abstraction.Models.Input.Login;
+using STSY.Identity.Abstraction.Service;
 
 namespace STSY.Identity.API.EndPoints
 {
@@ -158,12 +160,17 @@ namespace STSY.Identity.API.EndPoints
             }).AllowAnonymous();
             app.MapPost($"{prefix}/account/change-password", async ([FromBody] ChangePassword request,
                 [FromServices] IPasswordManager passwordManager,
-                [FromServices] IGetCurrentAuthorizedUser readUsers,
+                [FromServices] IUserManager userManager,
+                [FromServices] IGetCurrentAuthorizedUser currentUser,
                 CancellationToken token = default) =>
             {
                 try
                 {
-                    var result = await passwordManager.ChangeUserPasswordAsync(readUsers.CurrentUser.Id, request.OldPassword, request.NewPassword, token);
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    var result = await passwordManager.ChangeUserPasswordAsync(currentUser.CurrentUser.Id, request.NewPassword, request.OldPassword, token);
                     if (result.Success)
                     {
                         return Results.Ok(result);
@@ -197,7 +204,91 @@ namespace STSY.Identity.API.EndPoints
                 }
             }).RequireAuthorization();
 
-
+            app.MapPost($"{prefix}/account/step-up", async ([FromBody] LoginInput request,
+                [FromServices] IUserManager userManager,
+                [FromServices] IGetCurrentAuthorizedUser currentUser,
+                [FromServices] AuthenticatorFactory factory,
+                CancellationToken token = default) =>
+            {
+                try
+                {
+                    var authenticator = factory.GetAuthenticator(request.CredentialType);
+                    if (!authenticator.AllowStepUp) return Results.Forbid();
+                    request.Credentials[CredentialKeys.EMAIL_OR_USERNAME_KEY] = currentUser.CurrentUser.UserName;
+                    var result = await authenticator.ValidateCredentialAsync(request.Credentials);
+                    if (result.Success && result.User.Id.Equals(currentUser.CurrentUser.Id))
+                    {
+                        await userManager.EnableStepUpAsync(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, DateTimeOffset.UtcNow.AddMinutes(5), token);
+                        return Results.Ok("valid".AsResult());
+                    }
+                    return Results.Forbid();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(ex.Message.AsResult());
+                }
+                catch (AuthenticatorException ex)
+                {
+                    return Results.Unauthorized();
+                }
+                catch (ForbidException ex)
+                {
+                    return Results.Forbid();
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(ex.Message.AsResult());
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(ex.Message.AsResult());
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError("error while generate challenge".AsResult());
+                }
+            }).RequireAuthorization();
+            app.MapPost($"{prefix}/account/step-up-challenge", async ([FromBody] LoginInput request,
+    [FromServices] IUserManager userManager,
+    [FromServices] IGetCurrentAuthorizedUser currentUser,
+    [FromServices] AuthenticatorFactory factory,
+    CancellationToken token = default) =>
+            {
+                try
+                {
+                    var authenticator = factory.GetChallengeGenerator(request.CredentialType);
+                    var result = await authenticator.InitiateAsync(currentUser.CurrentUser);
+                    if (result.IsSuccess)
+                    {
+                        return Results.Ok(result);
+                    }
+                    return Results.Forbid();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(ex.Message.AsResult());
+                }
+                catch (AuthenticatorException ex)
+                {
+                    return Results.Unauthorized();
+                }
+                catch (ForbidException ex)
+                {
+                    return Results.Forbid();
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(ex.Message.AsResult());
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(ex.Message.AsResult());
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError("error while generate challenge".AsResult());
+                }
+            }).RequireAuthorization();
             return app;
 
         }

@@ -16,11 +16,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         public string CredentialType => CredentialTypeValue;
 
         UserManager<MicrosoftIdentityUser> _userManager;
-        ISessionManager _sessionManager;
-        public TOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager, ISessionManager sessionManager)
+        public TOTPAuthenticator(UserManager<MicrosoftIdentityUser> userManager)
         {
             _userManager = userManager;
-            _sessionManager = sessionManager;
         }
         public async Task<AuthenticatorResult> ValidateCredentialAsync(string userId, Dictionary<string, object> credentials)
         {

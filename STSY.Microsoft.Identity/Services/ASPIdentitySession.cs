@@ -95,16 +95,16 @@ namespace STSY.Microsoft.Identity.Services
             };
             if (isSignedIn)
             {
-                result.UserId = claimuser.FindFirstValue("UserID");
-                result.SessionId = claimuser.FindFirstValue(ClaimValueTypes.Sid);
+                result.UserId = claimuser.FindFirstValue(ClaimTypes.NameIdentifier);
+                result.SessionId = claimuser.FindFirstValue(ClaimTypes.Sid);
             }
             return result;
         }
         private async Task<SessionResult> GetNewSessionResult(MicrosoftIdentityUser user, string sessionId, CancellationToken cancellationToken = default)
         {
             var cliems = (await this._generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken)).ToList();
-            cliems.Add(new Claim(ClaimValueTypes.Sid, sessionId));
-            cliems.Add(new Claim("UserID", user.Id));
+            cliems.Add(new Claim(ClaimTypes.Sid, sessionId));
+            cliems.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
             await _signInManager.SignInWithClaimsAsync(user, true, cliems);
             return new SessionResult
             {

@@ -20,7 +20,8 @@ namespace STSY.Microsoft.Identity.Mappers
                 CreatedAt = user.CreatedAt,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
             };
         }
         public static IQueryable<UserData> AsUserData(this IQueryable<MicrosoftIdentityUser> users)
@@ -33,7 +34,8 @@ namespace STSY.Microsoft.Identity.Mappers
                 CreatedAt = user.CreatedAt,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
             });
         }
 

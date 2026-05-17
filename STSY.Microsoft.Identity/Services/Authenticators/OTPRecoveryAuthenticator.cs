@@ -15,11 +15,9 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         public const string CredentialTypeValue = "RecoveryCode";
         public string CredentialType => CredentialTypeValue;
         UserManager<MicrosoftIdentityUser> _userManager;
-        ISessionManager _sessionManager;
-        public OTPRecoveryAuthenticator(UserManager<MicrosoftIdentityUser> userManager, ISessionManager sessionManager)
+        public OTPRecoveryAuthenticator(UserManager<MicrosoftIdentityUser> userManager)
         {
             _userManager = userManager;
-            _sessionManager = sessionManager;
         }
         public async Task<AuthenticatorResult> ValidateCredentialAsync(string userid, Dictionary<string, object> credentials)
         {

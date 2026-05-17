@@ -13,12 +13,12 @@ using System.Threading.Tasks;
 
 namespace STSY.Identity.JWT.Generators.AccessTokens
 {
-    internal class JWTMFAccessTokenGenerator : IMFTokenGenerator
+    public class JWTMFAccessTokenGenerator : IMFTokenGenerator
     {
-        private readonly Dictionary<string, JWTAccessKeyOption> _keysById;
+        private readonly Dictionary<string, JWTMFTokenOption> _keysById;
 
-        private readonly JWTAccessKeyOption _activeKey;
-        public JWTMFAccessTokenGenerator(List<JWTAccessKeyOption> jWTAccessKeyOption)
+        private readonly JWTMFTokenOption _activeKey;
+        public JWTMFAccessTokenGenerator(List<JWTMFTokenOption> jWTAccessKeyOption)
         {
             _keysById = jWTAccessKeyOption.ToDictionary(k => k.KeyId, v => v);
             _activeKey = jWTAccessKeyOption.Where(s => s.IsPrimary).FirstOrDefault();

@@ -22,7 +22,10 @@ namespace STSY.Identity.Google.Authenticators
             _readUsers = readUsers;
             _userManager = userManager;
         }
-        public string CredentialType => "Google";
+        public string CredentialType => Constant.GoogleProviderType;
+
+        public bool AllowStepUp => false;
+
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
             var auth = new GoogleValidator();

@@ -99,6 +99,35 @@ namespace STSY.Identity.API.EndPoints
                 }
             }).RequireAuthorization();
 
+
+            app.MapPost($"{prefix}/mfa/enable", async (
+                [FromServices] ITwoFactorManager twoFactorManager,
+                [FromServices] IUserManager userManager,
+                [FromServices] IGetCurrentAuthorizedUser currentUser,
+                CancellationToken token = default) =>
+            {
+                try
+                {
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    await twoFactorManager.SetTwoFactorEnabled(currentUser.CurrentUser.Id, true, token);
+                    return Results.Ok();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(ex.Message.AsResult());
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(ex.Message.AsResult());
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(ex.Message.AsResult());
+                }
+            }).RequireAuthorization();
             return app;
         }
     }
