@@ -3,8 +3,8 @@ using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Contract.Models;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Input.account;
-using STSY.Identity.Abstraction.Models.Output;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,7 +12,7 @@ namespace STSY.Identity.Facebook.Authenticators
 {
 
 
-    public class FacebookAuthenticator : IAuthenticator
+    public class FacebookAuthenticator : IAuthenticator, IExternalAccountCreator
     {
         public const string FacebookCredentialToken = "FacebookToken";
         IReadUsers _readUsers;
@@ -27,6 +27,8 @@ namespace STSY.Identity.Facebook.Authenticators
         public string CredentialType => Constant.FacebookProviderType;
 
         public bool AllowStepUp => false;
+
+        public string Provider => Constant.FacebookProviderType;
 
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
@@ -58,9 +60,9 @@ namespace STSY.Identity.Facebook.Authenticators
             throw new STSYIdentityException("Invalid credentials");
         }
 
-        public async Task<STSYIdentityResult> CreateUser(Dictionary<string, object> credentials)
+        public async Task<UserData> CreateAccount(ExternalAccountCreateInput externalAccountCreateInput)
         {
-            if (credentials.TryGetValue(FacebookCredentialToken, out var clienttoken))
+            if (externalAccountCreateInput?.Credentials != null && externalAccountCreateInput.Credentials.TryGetValue(FacebookCredentialToken, out var clienttoken))
             {
                 var facebookUserToken = clienttoken.ToString();
                 var faceBookValidator = new FacebookAuthProvider(_option);
@@ -69,7 +71,7 @@ namespace STSY.Identity.Facebook.Authenticators
                 var user = await _readUsers.GetUserByLinkedAccountsIdAsync(Constant.FacebookProviderType, profile.Id);
                 if (user == null) await _readUsers.GetUserByUserNameOrEmailAsync(profile.Email);
                 if (user != null) throw new STSYIdentityException("there is account linked to provider email");
-                return await _userManager.CreateUser(new ExternalUserCreateInput
+                return await _userManager.CreateUser(new ExternalUserCreate
                 {
                     Email = profile.Email,
                     FirstName = profile.FirstName,

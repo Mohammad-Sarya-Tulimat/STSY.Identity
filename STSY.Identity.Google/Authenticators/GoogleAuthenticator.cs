@@ -3,14 +3,14 @@ using STSY.Identity.Abstraction.Contract.Authentication;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Contract.Models;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Input.account;
-using STSY.Identity.Abstraction.Models.Output;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace STSY.Identity.Google.Authenticators
 {
-    public class GoogleAuthenticator : IAuthenticator
+    public class GoogleAuthenticator : IAuthenticator, IExternalAccountCreator
     {
         public const string GoogleCredentialType = "GoogleIdToken";
         STSYGoogleIdentityOption _options;
@@ -23,7 +23,7 @@ namespace STSY.Identity.Google.Authenticators
             _userManager = userManager;
         }
         public string CredentialType => Constant.GoogleProviderType;
-
+        public string Provider => Constant.GoogleProviderType;
         public bool AllowStepUp => false;
 
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
@@ -52,23 +52,27 @@ namespace STSY.Identity.Google.Authenticators
             }
         }
 
-        public async Task<STSYIdentityResult> CreateUser(Dictionary<string, object> credentials)
+        public async Task<UserData> CreateAccount(ExternalAccountCreateInput externalAccountCreateInput)
         {
-            var auth = new GoogleValidator();
-            var result = await auth.VerifyGoogleToken(credentials[GoogleCredentialType].ToString(), _options.Audience);
-            var user = await _readUsers.GetUserByLinkedAccountsIdAsync(Constant.GoogleProviderType, result.Subject);
-            if (user == null) await _readUsers.GetUserByUserNameOrEmailAsync(result.Email);
-            if (user != null) throw new STSYIdentityException("there is account linked");
-            return await _userManager.CreateUser(new ExternalUserCreateInput
+            if (externalAccountCreateInput?.Credentials != null && externalAccountCreateInput.Credentials.TryGetValue(GoogleCredentialType, out var token))
             {
-                Email = result.Email,
-                FirstName = result.GivenName,
-                LastName = result.FamilyName,
-                UserName = result.Email,
-                Provider = Constant.GoogleProviderType,
-                ProviderId = result.Subject,
-                EmailVerified = result.EmailVerified,
-            });
+                var auth = new GoogleValidator();
+                var result = await auth.VerifyGoogleToken(token.ToString(), _options.Audience);
+                var user = await _readUsers.GetUserByLinkedAccountsIdAsync(Constant.GoogleProviderType, result.Subject);
+                if (user == null) await _readUsers.GetUserByUserNameOrEmailAsync(result.Email);
+                if (user != null) throw new STSYIdentityException("there is account linked");
+                return await _userManager.CreateUser(new ExternalUserCreate
+                {
+                    Email = result.Email,
+                    FirstName = result.GivenName,
+                    LastName = result.FamilyName,
+                    UserName = result.Email,
+                    Provider = Constant.GoogleProviderType,
+                    ProviderId = result.Subject,
+                    EmailVerified = result.EmailVerified,
+                });
+            }
+            throw new STSYIdentityException("Invalid credentials");
         }
     }
 }

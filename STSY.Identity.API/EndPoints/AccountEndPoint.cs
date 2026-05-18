@@ -18,29 +18,67 @@ namespace STSY.Identity.API.EndPoints
         {
             app.MapPost($"{prefix}/account", async ([FromBody] UserCreateInput request,
                 [FromServices] IUserManager userManager,
-                [FromServices] IReadUsers readUsers,
                 [FromServices] ISessionManager loginService,
                 CancellationToken token = default) =>
             {
                 try
                 {
-                    var result = await userManager.CreateUser(request, token);
-                    if (result.Success)
+                    var user = await userManager.CreateUser(request, token);
+                    var session = await loginService.CreateSessionAsync(user, token);
+                    if (session.isSuccess)
                     {
-
-                        var user = await readUsers.GetUserByUserNameOrEmailAsync(request.UserName, token);
-                        var session = await loginService.CreateSessionAsync(user, token);
-                        if (session.isSuccess)
-                        {
-                            return Results.Ok(session);
-                        }
-                        else
-                        {
-                            return Results.BadRequest(session);
-                        }
+                        return Results.Ok(session);
                     }
                     else
-                        return Results.BadRequest(result);
+                    {
+                        return Results.BadRequest(session);
+                    }
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(ex.Message.AsResult());
+                }
+                catch (AuthenticatorException ex)
+                {
+                    return Results.Unauthorized();
+                }
+                catch (ForbidException ex)
+                {
+                    return Results.Forbid();
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(ex.Message.AsResult());
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(ex.Message.AsResult());
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError("error while generate challenge".AsResult());
+                }
+            }).AllowAnonymous();
+
+            app.MapPost($"{prefix}/account/social", async ([FromBody] ExternalAccountCreateInput request,
+                [FromServices] ExternalAccountCreatorFactory creatorFactory,
+                [FromServices] ISessionManager loginService,
+                CancellationToken token = default) =>
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(request.Password)) return Results.BadRequest("please set password".AsResult());
+                    var creator = creatorFactory.Get(request.Provider);
+                    var user = await creator.CreateAccount(request);
+                    var session = await loginService.CreateSessionAsync(user, token);
+                    if (session.isSuccess)
+                    {
+                        return Results.Ok(session);
+                    }
+                    else
+                    {
+                        return Results.BadRequest(session);
+                    }
                 }
                 catch (ArgumentException ex)
                 {
@@ -91,7 +129,7 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(ex.Message);
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (AuthenticatorException ex)
                 {
@@ -103,15 +141,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(ex.Message);
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError("error while generate challenge");
+                    return Results.InternalServerError("error while generate challenge".AsResult());
                 }
             }).AllowAnonymous();
 
@@ -135,7 +173,7 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(ex.Message);
+                    return Results.BadRequest(ex.Message.AsResult());
                 }
                 catch (AuthenticatorException ex)
                 {
@@ -147,15 +185,15 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    return Results.NotFound(ex.Message);
+                    return Results.NotFound(ex.Message.AsResult());
                 }
                 catch (STSYIdentityException ex)
                 {
-                    return Results.InternalServerError(new { ex.Message });
+                    return Results.InternalServerError(ex.Message.AsResult());
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError("error while generate challenge");
+                    return Results.InternalServerError("error while generate challenge".AsResult());
                 }
             }).AllowAnonymous();
             app.MapPost($"{prefix}/account/change-password", async ([FromBody] ChangePassword request,

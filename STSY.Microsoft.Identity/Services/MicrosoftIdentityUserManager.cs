@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Models;
@@ -31,7 +32,7 @@ namespace STSY.Microsoft.Identity.Services
             var result = await _userManager.AddToRoleAsync(user, role);
             return result.AsSTSYIdentityResult();
         }
-        public async Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default)
+        public async Task<UserData> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -48,14 +49,16 @@ namespace STSY.Microsoft.Identity.Services
                     CreatedAt = DateTimeOffset.UtcNow
                 };
                 var result = await _userManager.CreateAsync(user, input.Password);
-                return result.AsSTSYIdentityResult();
+                if (result.Succeeded)
+                    return user.ToUserData();
+                else throw new STSYIdentityException("error while create user" + string.Join("\n", result.Errors.Select(s => s.Description)));
             }
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
 
 
-        public async Task<STSYIdentityResult> CreateUser(ExternalUserCreateInput input, CancellationToken cancellationToken = default)
+        public async Task<UserData> CreateUser(ExternalUserCreate input, CancellationToken cancellationToken = default)
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
             var user = new MicrosoftIdentityUser
@@ -75,8 +78,10 @@ namespace STSY.Microsoft.Identity.Services
                         ProviderUserId=input.ProviderId}
               }
             };
-            var result = await _userManager.CreateAsync(user);
-            return result.AsSTSYIdentityResult();
+            var result = await _userManager.CreateAsync(user, input.Password);
+            if (result.Succeeded)
+                return user.ToUserData();
+            else throw new STSYIdentityException("error while create user" + string.Join("\n", result.Errors.Select(s => s.Description)));
         }
         public async Task<bool> IsStepUpEnabled(string userId, string sessionId, CancellationToken cancellationToken)
         {

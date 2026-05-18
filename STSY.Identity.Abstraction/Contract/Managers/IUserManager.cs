@@ -1,4 +1,5 @@
-﻿using STSY.Identity.Abstraction.Models.Input.account;
+﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using System;
 using System.Threading;
@@ -16,9 +17,9 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <returns></returns>       
         /// /// <exception cref="System.ArgumentNullException"></exception>   
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
-        Task<STSYIdentityResult> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default);
+        Task<UserData> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default);
 
-        Task<STSYIdentityResult> CreateUser(ExternalUserCreateInput input, CancellationToken cancellationToken = default);
+        Task<UserData> CreateUser(ExternalUserCreate input, CancellationToken cancellationToken = default);
 
 
         /// <summary>
