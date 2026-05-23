@@ -27,7 +27,7 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
         }
         public async Task<AuthenticatorResult> ValidateCredentialAsync(Dictionary<string, object> credentials)
         {
-            if (credentials == null || !credentials.ContainsKey(CredentialKeys.PASSWORD_KEY)) throw new AuthenticatorException("credentials is required.");
+            if (credentials == null || !credentials.ContainsKey(CredentialKeys.PASSKEY_KEY)) throw new AuthenticatorException("credentials is required.");
             var userKey = await _signInManager.PerformPasskeyAssertionAsync(credentials[CredentialKeys.PASSKEY_KEY].ToString());
             return new AuthenticatorResult
             {
