@@ -25,7 +25,7 @@ namespace STSY.Identity.API.EndPoints
                 {
                     var user = await userManager.CreateUser(request, token);
                     var session = await loginService.CreateSessionAsync(user, token);
-                    if (session.isSuccess)
+                    if (session.IsSuccess)
                     {
                         return Results.Ok(session);
                     }
@@ -71,7 +71,7 @@ namespace STSY.Identity.API.EndPoints
                     var creator = creatorFactory.Get(request.Provider);
                     var user = await creator.CreateAccount(request);
                     var session = await loginService.CreateSessionAsync(user, token);
-                    if (session.isSuccess)
+                    if (session.IsSuccess)
                     {
                         return Results.Ok(session);
                     }

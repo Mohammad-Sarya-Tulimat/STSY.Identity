@@ -80,8 +80,8 @@ namespace STSY.Identity.Abstraction.Service
             await _sessionStorage.AddSession(user.Id, userSession, ToSave(refreshToen.Token), cancellationToken);
             return new SessionResult
             {
-                isSuccess = true,
-                IsMfRequred = false,
+                IsSuccess = true,
+                IsMFARequired = false,
                 Message = "login successfully",
                 SessionData = tokenDatas
             };
@@ -93,8 +93,8 @@ namespace STSY.Identity.Abstraction.Service
             result[MFATokenKey] = await _mFTokenGenerator.GenerateMFAToken(user.Id, nameof(UserData));
             return new SessionResult
             {
-                isSuccess = true,
-                IsMfRequred = true,
+                IsSuccess = true,
+                IsMFARequired = true,
                 Message = "MFA token generated successfully",
                 SessionData = result
             };
@@ -126,8 +126,8 @@ namespace STSY.Identity.Abstraction.Service
             await _sessionStorage.UpdateSession(user.Id, userSession, ToSave(refreshToen.Token), cancellationToken);
             return new SessionResult
             {
-                isSuccess = true,
-                IsMfRequred = false,
+                IsSuccess = true,
+                IsMFARequired = false,
                 Message = "Session refreshed successfully",
                 SessionData = tokenDatas
             };

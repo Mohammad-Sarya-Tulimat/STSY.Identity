@@ -43,8 +43,8 @@ namespace STSY.Microsoft.Identity.Services
             Dictionary<string, object> result = new Dictionary<string, object>();
             return new SessionResult
             {
-                isSuccess = true,
-                IsMfRequred = true,
+                IsSuccess = true,
+                IsMFARequired = true,
                 Message = "Require Mf",
                 SessionData = result
             };
@@ -108,8 +108,8 @@ namespace STSY.Microsoft.Identity.Services
             await _signInManager.SignInWithClaimsAsync(user, true, cliems);
             return new SessionResult
             {
-                isSuccess = true,
-                IsMfRequred = false,
+                IsSuccess = true,
+                IsMFARequired = false,
                 Message = "Singin done"
             };
         }

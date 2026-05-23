@@ -77,7 +77,9 @@ builder.Services.AddScoped<IGetCurrentAuthorizedUser, GetCurrentAuthorizedUser>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
-
+app.UseCors(c =>
+    c.SetIsOriginAllowed(_ => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials()
+);
 // Enable Swagger only in Development
 if (app.Environment.IsDevelopment())
 {
@@ -93,7 +95,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
