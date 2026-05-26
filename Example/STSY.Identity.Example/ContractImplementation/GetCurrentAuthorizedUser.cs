@@ -13,7 +13,7 @@ namespace STSY.Identity.Example.ContractImplementation
         }
         private string GetValue(ClaimsPrincipal user, string type)
         {
-            return user.Claims.FirstOrDefault(s => s.Type.Equals(type)).Value;
+            return user.Claims.FirstOrDefault(s => s.Type.Equals(type))?.Value;
         }
         public CurrentAuthrizedUser CurrentUser
         {
@@ -21,6 +21,10 @@ namespace STSY.Identity.Example.ContractImplementation
             {
                 if (_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == false) return null;
                 var user = _httpContextAccessor.HttpContext.User;
+                var birth = DateTime.MinValue;
+                var date = GetValue(user, ClaimTypes.DateOfBirth);
+                if (date != null)
+                    birth = DateTime.Parse(date);
                 return new CurrentAuthrizedUser
                 {
                     Id = GetValue(user, ClaimTypes.NameIdentifier),
@@ -30,7 +34,7 @@ namespace STSY.Identity.Example.ContractImplementation
                     FirstName = GetValue(user, ClaimTypes.GivenName),
                     LastName = GetValue(user, ClaimTypes.Surname),
                     SessionId = GetValue(user, ClaimTypes.Sid),
-                    DateOfBirth = DateTime.Parse(GetValue(user, ClaimTypes.DateOfBirth)),
+                    DateOfBirth = birth,
 
                 };
             }

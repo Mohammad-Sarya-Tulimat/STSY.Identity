@@ -28,7 +28,7 @@ namespace STSY.Identity.Example.ContractImplementation
         public async Task<string> SaveImageAsync(string userId, UploadedFile uploadedFile, CancellationToken cancellationToken = default)
         {
             var directory = Path.Combine(BaseUr, userId);
-            if (Directory.Exists(directory))
+            if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }

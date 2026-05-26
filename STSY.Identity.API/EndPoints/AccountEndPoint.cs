@@ -328,10 +328,10 @@ namespace STSY.Identity.API.EndPoints
                 }
             }).RequireAuthorization();
             app.MapPost($"{prefix}/account/step-up-challenge", async ([FromBody] LoginInput request,
-    [FromServices] IUserManager userManager,
-    [FromServices] IGetCurrentAuthorizedUser currentUser,
-    [FromServices] AuthenticatorFactory factory,
-    CancellationToken token = default) =>
+                [FromServices] IUserManager userManager,
+                [FromServices] IGetCurrentAuthorizedUser currentUser,
+                [FromServices] AuthenticatorFactory factory,
+                CancellationToken token = default) =>
             {
                 try
                 {
@@ -342,6 +342,42 @@ namespace STSY.Identity.API.EndPoints
                         return Results.Ok(result);
                     }
                     return Results.Forbid();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(ex.Message.AsResult());
+                }
+                catch (AuthenticatorException ex)
+                {
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
+                }
+                catch (ForbidException ex)
+                {
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(ex.Message.AsResult());
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(ex.Message.AsResult());
+                }
+                catch (Exception ex)
+                {
+                    return Results.InternalServerError("error while generate challenge".AsResult());
+                }
+            }).RequireAuthorization();
+
+
+            app.MapGet($"{prefix}/account/me", async (
+            [FromServices] IReadUsers readUsers,
+            [FromServices] IGetCurrentAuthorizedUser currentUser,
+            CancellationToken token = default) =>
+            {
+                try
+                {
+                    return Results.Ok(await readUsers.GetUserByIdAsync(currentUser.CurrentUser.Id));
                 }
                 catch (ArgumentException ex)
                 {

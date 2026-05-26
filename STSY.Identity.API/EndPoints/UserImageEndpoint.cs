@@ -66,7 +66,7 @@ namespace STSY.Identity.API.EndPoints
                  {
                      return Results.InternalServerError("error while generate challenge".AsResult());
                  }
-             }).RequireAuthorization();
+             }).DisableAntiforgery().RequireAuthorization();
 
             app.MapDelete($"{prefix}/account/profile-image",
                  async ([FromServices] IReadUsers readUsers,
