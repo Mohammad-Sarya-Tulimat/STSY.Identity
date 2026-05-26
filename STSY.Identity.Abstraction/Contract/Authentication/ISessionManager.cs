@@ -16,7 +16,7 @@ namespace STSY.Identity.Abstraction.Contract.Authentication
 
         Task<SessionValidateResult> ValidateSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default);
         Task<SessionValidateResult> ValidateMFSessionAsync(Dictionary<string, object> dataToValidate, CancellationToken cancellationToken = default);
-
+        Task SignOutAsync(string sessionId, CancellationToken cancellationToken = default);
 
     }
 }

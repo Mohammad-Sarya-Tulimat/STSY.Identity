@@ -18,9 +18,9 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// /// <exception cref="System.ArgumentNullException"></exception>   
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
         Task<UserData> CreateUser(UserCreateInput input, CancellationToken cancellationToken = default);
-
         Task<UserData> CreateUser(ExternalUserCreate input, CancellationToken cancellationToken = default);
-
+        Task<UserData> UpdateUser(UserData user, UserUpdateInput update, CancellationToken cancellationToken = default);
+        Task UpdateProfileImageRef(UserData user, string imageref, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///  Add a role to the user

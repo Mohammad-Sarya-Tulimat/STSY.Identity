@@ -16,6 +16,9 @@ namespace STSY.Identity.API.EndPoints
     {
         public static IEndpointRouteBuilder MapSTSYAccountEndPoint(this IEndpointRouteBuilder app, string prefix)
         {
+
+
+
             app.MapPost($"{prefix}/account", async ([FromBody] UserCreateInput request,
                 [FromServices] IUserManager userManager,
                 [FromServices] ISessionManager loginService,
@@ -40,11 +43,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -59,7 +62,6 @@ namespace STSY.Identity.API.EndPoints
                     return Results.InternalServerError("error while generate challenge".AsResult());
                 }
             }).AllowAnonymous();
-
             app.MapPost($"{prefix}/account/social", async ([FromBody] ExternalAccountCreateInput request,
                 [FromServices] ExternalAccountCreatorFactory creatorFactory,
                 [FromServices] ISessionManager loginService,
@@ -86,11 +88,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -105,6 +107,45 @@ namespace STSY.Identity.API.EndPoints
                     return Results.InternalServerError("error while generate challenge".AsResult());
                 }
             }).AllowAnonymous();
+
+            app.MapPut($"{prefix}/account", async ([FromBody] UserUpdateInput request,
+              [FromServices] IUserManager userManager,
+              [FromServices] IGetCurrentAuthorizedUser currentUser,
+              CancellationToken token = default) =>
+                {
+                    try
+                    {
+                        var user = await userManager.UpdateUser(currentUser.CurrentUser, request, token);
+                        return Results.Ok(user);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return Results.BadRequest(ex.Message.AsResult());
+                    }
+                    catch (AuthenticatorException ex)
+                    {
+                        return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
+                    }
+                    catch (ForbidException ex)
+                    {
+                        return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
+                    }
+                    catch (ResourceNotFoundException ex)
+                    {
+                        return Results.NotFound(ex.Message.AsResult());
+                    }
+                    catch (STSYIdentityException ex)
+                    {
+                        return Results.InternalServerError(ex.Message.AsResult());
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.InternalServerError("error while generate challenge".AsResult());
+                    }
+                }).RequireAuthorization();
+
+
+
 
             app.MapPost($"{prefix}/account/reset-password", async ([FromBody] ResetPasswordInput request, [FromServices] IPasswordManager passwordManager, [FromServices] IReadUsers readUsers, CancellationToken token = default) =>
             {
@@ -133,11 +174,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -177,11 +218,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -222,11 +263,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -267,11 +308,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -308,11 +349,11 @@ namespace STSY.Identity.API.EndPoints
                 }
                 catch (AuthenticatorException ex)
                 {
-                    return Results.Unauthorized();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status401Unauthorized);
                 }
                 catch (ForbidException ex)
                 {
-                    return Results.Forbid();
+                    return Results.Json(ex.Message.AsResult(), statusCode: StatusCodes.Status403Forbidden);
                 }
                 catch (ResourceNotFoundException ex)
                 {

@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace STSY.Identity.Example.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +42,7 @@ namespace STSY.Identity.Example.Migrations
                     SecurityChangeSessionExpiresAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
                     SecurityChangeSessionId = table.Column<string>(type: "longtext", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ImageReference = table.Column<string>(type: "longtext", nullable: true),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),

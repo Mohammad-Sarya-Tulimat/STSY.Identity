@@ -14,5 +14,8 @@ namespace STSY.Identity.Abstraction.Contract.Models.UserModels
         public DateTimeOffset CreatedAt { get; set; }
         public bool IsEmailConfirmed { get; set; }
         public bool IsPhoneNumberConfirmed { get; set; }
+
+        public string ImageReference { get; set; }
+
     }
 }

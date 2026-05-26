@@ -310,6 +310,40 @@ namespace STSY.Microsoft.Identity.Services
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
 
+        public async Task<UserData> UpdateUser(UserData user, UserUpdateInput update, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (user == null) throw new ArgumentNullException(nameof(user));
+                if (update == null) throw new ArgumentNullException(nameof(update));
+                var dbuser = await _userManager.FindByIdAsync(user.Id);
+                if (dbuser == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), user.Id, "User not found.");
+                dbuser.FirstName = update.FirstName;
+                dbuser.LastName = update.LastName;
+                dbuser.DateOfBirth = update.DateOfBirth;
+                await _userManager.UpdateAsync(dbuser);
+                return dbuser.UpdateUserData(user);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+
+        public async Task UpdateProfileImageRef(UserData user, string imageReference, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (user == null) throw new ArgumentNullException(nameof(user));
+                var dbuser = await _userManager.FindByIdAsync(user.Id);
+                if (dbuser == null) throw new ResourceNotFoundException(nameof(MicrosoftIdentityUser), user.Id, "User not found.");
+                dbuser.ImageReference = imageReference;
+                await _userManager.UpdateAsync(dbuser);
+            }
+            catch (STSYIdentityException ex) { throw; }
+            catch (ArgumentException ex) { throw; }
+            catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
+        }
+
         #endregion
     }
 }

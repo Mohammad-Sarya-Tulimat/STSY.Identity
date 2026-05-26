@@ -200,6 +200,9 @@ namespace STSY.Identity.Example.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ImageReference")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("LastName")
                         .HasColumnType("longtext");
 

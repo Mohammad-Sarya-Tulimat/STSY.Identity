@@ -11,8 +11,8 @@ using STSY.Microsoft.Identity.DBContext;
 namespace STSY.Identity.Example.Migrations
 {
     [DbContext(typeof(STSYIdentityDbContext))]
-    [Migration("20260517195128_init")]
-    partial class init
+    [Migration("20260526135216_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,6 +201,9 @@ namespace STSY.Identity.Example.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("FirstName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImageReference")
                         .HasColumnType("longtext");
 
                     b.Property<string>("LastName")

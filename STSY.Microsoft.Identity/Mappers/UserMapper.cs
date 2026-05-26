@@ -2,6 +2,7 @@
 using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Models;
+using System;
 using System.Linq;
 
 namespace STSY.Microsoft.Identity.Mappers
@@ -22,7 +23,28 @@ namespace STSY.Microsoft.Identity.Mappers
                 LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
                 DateOfBirth = user.DateOfBirth,
+                ImageReference = user.ImageReference,
+                IsEmailConfirmed = user.EmailConfirmed,
+                IsPhoneNumberConfirmed = user.PhoneNumberConfirmed,
             };
+        }
+
+        public static UserData UpdateUserData(this MicrosoftIdentityUser user, UserData target)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            target.Id = user.Id;
+            target.UserName = user.UserName;
+            target.Email = user.Email;
+            target.CreatedAt = user.CreatedAt;
+            target.FirstName = user.FirstName;
+            target.LastName = user.LastName;
+            target.PhoneNumber = user.PhoneNumber;
+            target.DateOfBirth = user.DateOfBirth;
+            target.ImageReference = user.ImageReference;
+            target.IsEmailConfirmed = user.EmailConfirmed;
+            target.IsPhoneNumberConfirmed = user.PhoneNumberConfirmed;
+            return target;
         }
         public static IQueryable<UserData> AsUserData(this IQueryable<MicrosoftIdentityUser> users)
         {
@@ -36,6 +58,9 @@ namespace STSY.Microsoft.Identity.Mappers
                 LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
                 DateOfBirth = user.DateOfBirth,
+                ImageReference = user.ImageReference,
+                IsEmailConfirmed = user.EmailConfirmed,
+                IsPhoneNumberConfirmed = user.PhoneNumberConfirmed
             });
         }
 

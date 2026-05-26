@@ -113,5 +113,10 @@ namespace STSY.Microsoft.Identity.Services
                 Message = "Singin done"
             };
         }
+        public async Task SignOutAsync(string sessionId, CancellationToken cancellationToken = default)
+        {
+            await _signInManager.SignOutAsync();
+
+        }
     }
 }

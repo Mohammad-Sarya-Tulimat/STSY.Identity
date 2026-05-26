@@ -154,5 +154,9 @@ namespace STSY.Identity.Abstraction.Service
                 SessionId = null
             };
         }
+        public async Task SignOutAsync(string sessionId, CancellationToken cancellationToken = default)
+        {
+            await _sessionStorage.RemoveSession(sessionId, cancellationToken);
+        }
     }
 }

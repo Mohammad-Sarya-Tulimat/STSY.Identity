@@ -54,9 +54,9 @@ namespace STSY.Microsoft.Identity.Services
             return await this._dbcontext.UserSessions.AsUserSession().Where(s => s.UserId.Equals(userId)).ToListAsync(cancellationToken);
         }
 
-        public async Task<STSYIdentityResult> RemoveSession(string userId, string sessionId, CancellationToken cancellationToken)
+        public async Task<STSYIdentityResult> RemoveSession(string sessionId, CancellationToken cancellationToken = default)
         {
-            var result = await this._dbcontext.UserSessions.Where(s => s.UserId.Equals(userId) && s.Id.Equals(sessionId)).ExecuteDeleteAsync(cancellationToken);
+            var result = await this._dbcontext.UserSessions.Where(s => s.Id.Equals(sessionId)).ExecuteDeleteAsync(cancellationToken);
             if (result > 0)
                 return STSYIdentityResult.SuccessResult;
             else return STSYIdentityResult.BuildFailure("cannot find session");

@@ -13,6 +13,6 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         Task<IDictionary<string, object>> GetSessionProtectedData(string seassionId, CancellationToken cancellationToken);
         Task<STSYIdentityResult> AddSession(string userId, UserSession session, IDictionary<string, object> sessionProtectionData, CancellationToken cancellationToken);
         Task<STSYIdentityResult> UpdateSession(string userId, UserSession session, IDictionary<string, object> sessionProtectionData, CancellationToken cancellationToken);
-        Task<STSYIdentityResult> RemoveSession(string userId, string sessionId, CancellationToken cancellationToken);
+        Task<STSYIdentityResult> RemoveSession(string sessionId, CancellationToken cancellationToken = default);
     }
 }
