@@ -293,8 +293,9 @@ namespace STSY.Identity.API.EndPoints
                     var result = await authenticator.ValidateCredentialAsync(request.Credentials);
                     if (result.Success && result.User.Id.Equals(currentUser.CurrentUser.Id))
                     {
-                        await userManager.EnableStepUpAsync(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, DateTimeOffset.UtcNow.AddMinutes(5), token);
-                        return Results.Ok("valid".AsResult());
+                        var toDate = DateTimeOffset.UtcNow.AddMinutes(5);
+                        await userManager.EnableStepUpAsync(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, toDate, token);
+                        return Results.Ok(new { toDate });
                     }
                     return Results.Forbid();
                 }
