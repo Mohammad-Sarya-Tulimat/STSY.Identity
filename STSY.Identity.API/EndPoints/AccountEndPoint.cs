@@ -245,10 +245,6 @@ namespace STSY.Identity.API.EndPoints
             {
                 try
                 {
-                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
-                    {
-                        return Results.Forbid();
-                    }
                     var result = await passwordManager.ChangeUserPasswordAsync(currentUser.CurrentUser.Id, request.NewPassword, request.OldPassword, token);
                     if (result.Success)
                     {
