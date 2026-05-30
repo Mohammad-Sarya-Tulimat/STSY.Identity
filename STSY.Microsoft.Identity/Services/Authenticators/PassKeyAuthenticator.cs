@@ -4,6 +4,7 @@ using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
 using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Abstraction.Models.Output.Auth;
 using STSY.Identity.Models;
@@ -70,12 +71,18 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             catch (ArgumentException ex) { throw; }
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
-        public async Task<STSYIdentityResult> PasskeyAttestationAsync(string credential)
+        public async Task<STSYIdentityResult> PasskeyAttestationAsync(PassKeyAttestation attestation)
         {
             try
             {
-                if (credential == null) throw new ArgumentNullException(nameof(credential), "credential cannot be null");
-                var result = await _signInManager.PerformPasskeyAttestationAsync(credential);
+                if (attestation == null) throw new ArgumentNullException(nameof(attestation), "credential cannot be null");
+                var result = await _signInManager.PerformPasskeyAttestationAsync(attestation.Credential);
+                if (result.Succeeded)
+                {
+                    var user = await _userManager.FindByIdAsync(result.UserEntity.Id);
+                    result.Passkey.Name = result.Passkey.Name ?? attestation.Name;
+                    await _userManager.AddOrUpdatePasskeyAsync(user, result.Passkey);
+                }
                 return new STSYIdentityResult
                 {
                     Success = result.Succeeded,

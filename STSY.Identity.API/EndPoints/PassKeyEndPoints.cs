@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using STSY.Identity.Abstraction.Contract;
 using STSY.Identity.Abstraction.Contract.Exeptions;
 using STSY.Identity.Abstraction.Contract.Managers;
+using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.API;
 
 namespace STSY.Microsoft.Identity.EndPoints
@@ -50,7 +51,7 @@ namespace STSY.Microsoft.Identity.EndPoints
                 [FromServices] IPassKeyManager passKeyManager,
                 [FromServices] IUserManager userManager,
                 [FromServices] IGetCurrentAuthorizedUser currentUser,
-                [FromBody] string credential,
+                [FromBody] PassKeyAttestation attestation,
                 CancellationToken token = default
                 ) =>
             {
@@ -61,7 +62,7 @@ namespace STSY.Microsoft.Identity.EndPoints
                     {
                         return Results.Forbid();
                     }
-                    var creationOption = await passKeyManager.PasskeyAttestationAsync(credential);
+                    var creationOption = await passKeyManager.PasskeyAttestationAsync(attestation);
                     if (!creationOption.Success)
                     {
                         return Results.BadRequest(creationOption);

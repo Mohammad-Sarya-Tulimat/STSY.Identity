@@ -1,5 +1,6 @@
 ﻿using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <returns></returns> 
         /// <exception cref="System.ArgumentNullException"> when credential is null or empty </exception>"
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
-        Task<STSYIdentityResult> PasskeyAttestationAsync(string credential);
+        Task<STSYIdentityResult> PasskeyAttestationAsync(PassKeyAttestation attestation);
         /// <summary>
         /// remove passkey for the user
         /// </summary>

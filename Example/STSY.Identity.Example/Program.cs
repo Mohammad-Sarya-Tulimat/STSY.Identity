@@ -45,7 +45,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = "test",
         ValidAudience = "test"
     };
-});
+}).AddCookie("Identity.TwoFactorUserId");
 
 builder.Services.AddAuthorization();
 
@@ -79,6 +79,12 @@ builder.Services.AddScoped<IUsersProfileImagesStore, UserImageStorage>();
 builder.Services.AddScoped<IGetCurrentAuthorizedUser, GetCurrentAuthorizedUser>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<IdentityPasskeyOptions>(options =>
+{
+    options.ServerDomain = "localhost";
+    options.AuthenticatorTimeout = TimeSpan.FromMinutes(3);
+    options.ChallengeSize = 64;
+});
 var app = builder.Build();
 app.UseCors(c =>
     c.SetIsOriginAllowed(_ => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials()
@@ -99,9 +105,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapSTSYAccountEndPoint("identity");
 app.MapSTSYLoginEndPoint("identity");
