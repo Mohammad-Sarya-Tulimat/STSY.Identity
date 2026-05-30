@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using STSY.Identity.Abstraction.Contract;
@@ -50,6 +51,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddSTSYMicrosoftIdentity(identity =>
 {
+    identity.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     identity.User.RequireUniqueEmail = true;
     identity.Password.RequiredUniqueChars = 3;
     identity.Password.RequiredLength = 8;

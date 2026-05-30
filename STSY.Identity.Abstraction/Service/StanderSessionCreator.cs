@@ -111,7 +111,9 @@ namespace STSY.Identity.Abstraction.Service
             }
             var user = await _readUsers.GetUserByIdAsync(validate.UserId, cancellationToken);
             Dictionary<string, object> tokenDatas = new Dictionary<string, object>();
-            var cliems = await _generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken);
+            var cliems = (await _generateUserClaims.GetUserClaimsAsync(user.Id, cancellationToken)).ToList();
+            if (cliems.Any(s => s.Type.Equals(ClaimTypes.Sid))) throw new AuthenticatorException("You cannot use ClaimTypes.Sid in claim it is needed by framework");
+            cliems.Add(new System.Security.Claims.Claim(ClaimTypes.Sid, sessionId));
             var refreshToen = await _refreshTokenGenerator.GenerateRefreshToken(user);
             tokenDatas["accessToken"] = await _accessTokenGenerator.GenerateAccessToken(user.Id, nameof(UserData), cliems.ToList());
             tokenDatas[RefreshTokenKey] = refreshToen;

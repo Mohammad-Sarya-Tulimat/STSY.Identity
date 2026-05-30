@@ -68,10 +68,12 @@ namespace STSY.Identity.Example.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("longtext");
@@ -85,6 +87,23 @@ namespace STSY.Identity.Example.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserPasskey<string>", b =>
+                {
+                    b.Property<byte[]>("CredentialId")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varbinary(1024)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("CredentialId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserPasskeys", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -108,10 +127,12 @@ namespace STSY.Identity.Example.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("longtext");
@@ -224,7 +245,8 @@ namespace STSY.Identity.Example.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
@@ -346,6 +368,64 @@ namespace STSY.Identity.Example.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserPasskey<string>", b =>
+                {
+                    b.HasOne("STSY.Identity.Models.MicrosoftIdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Microsoft.AspNetCore.Identity.IdentityPasskeyData", "Data", b1 =>
+                        {
+                            b1.Property<byte[]>("IdentityUserPasskeyCredentialId")
+                                .HasColumnType("varbinary(1024)");
+
+                            b1.Property<byte[]>("AttestationObject")
+                                .IsRequired()
+                                .HasColumnType("longblob");
+
+                            b1.Property<byte[]>("ClientDataJson")
+                                .IsRequired()
+                                .HasColumnType("longblob");
+
+                            b1.Property<DateTimeOffset>("CreatedAt")
+                                .HasColumnType("datetime");
+
+                            b1.Property<bool>("IsBackedUp")
+                                .HasColumnType("tinyint(1)");
+
+                            b1.Property<bool>("IsBackupEligible")
+                                .HasColumnType("tinyint(1)");
+
+                            b1.Property<bool>("IsUserVerified")
+                                .HasColumnType("tinyint(1)");
+
+                            b1.Property<string>("Name")
+                                .HasColumnType("longtext");
+
+                            b1.Property<byte[]>("PublicKey")
+                                .IsRequired()
+                                .HasColumnType("longblob");
+
+                            b1.Property<uint>("SignCount")
+                                .HasColumnType("int unsigned");
+
+                            b1.Property<string>("Transports")
+                                .HasColumnType("longtext");
+
+                            b1.HasKey("IdentityUserPasskeyCredentialId");
+
+                            b1.ToTable("AspNetUserPasskeys");
+
+                            b1.WithOwner()
+                                .HasForeignKey("IdentityUserPasskeyCredentialId");
+                        });
+
+                    b.Navigation("Data")
                         .IsRequired();
                 });
 

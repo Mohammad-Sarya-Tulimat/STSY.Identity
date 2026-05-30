@@ -1,5 +1,7 @@
-﻿using STSY.Identity.Abstraction.Contract.Models.UserModels;
+﻿using STSY.Identity.Abstraction.Contract.Models;
+using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Output;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace STSY.Identity.Abstraction.Contract.Managers
@@ -34,5 +36,7 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <exception cref="Exeptions.ResourceNotFoundException"></exception>" 
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
         Task<STSYIdentityResult> RemovePassKey(UserData user, byte[] id);
+
+        Task<List<UserPassKey>> ListPassKey(UserData user);
     }
 }

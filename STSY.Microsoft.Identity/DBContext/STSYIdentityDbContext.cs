@@ -18,6 +18,7 @@ namespace STSY.Microsoft.Identity.DBContext
             builder.ApplyConfiguration(new SessionEFCoreMapper());
             builder.ApplyConfiguration(new UserExternalLoginEfCoreMapper());
             builder.ApplyConfiguration(new PasswordHistoryMapper());
+            builder.ApplyConfiguration(new PassKeyEFMapper());
         }
         public DbSet<MicrosoftIdentityPasswordHistory> PasswordHistories { get; set; }
         public DbSet<MicrosoftIdentityUserSession> UserSessions { get; set; }

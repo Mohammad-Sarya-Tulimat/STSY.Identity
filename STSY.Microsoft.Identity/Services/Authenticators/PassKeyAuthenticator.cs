@@ -10,6 +10,7 @@ using STSY.Identity.Models;
 using STSY.Microsoft.Identity.Mappers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 namespace STSY.Microsoft.Identity.Services.Authenticators
 {
@@ -104,5 +105,17 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             catch (Exception ex) { throw new STSYIdentityException(ex.Message, ex); }
         }
 
+        public async Task<List<UserPassKey>> ListPassKey(UserData user)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user), "user data cannot be null");
+            var appUser = await _userManager.FindByIdAsync(user.Id);
+            var keys = await _userManager.GetPasskeysAsync(appUser);
+            return keys.Select(key => new UserPassKey
+            {
+                CreatedAt = key.CreatedAt,
+                Id = key.CredentialId,
+                Name = key.Name
+            }).ToList();
+        }
     }
 }

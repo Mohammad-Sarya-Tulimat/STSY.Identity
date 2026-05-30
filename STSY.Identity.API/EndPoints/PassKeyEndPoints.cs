@@ -124,6 +124,41 @@ namespace STSY.Microsoft.Identity.EndPoints
                 }
             }).RequireAuthorization();
 
+            app.MapGet($"{prefix}/passkey", async (
+              [FromServices] IPassKeyManager passKeyManager,
+              [FromServices] IUserManager userManager,
+              [FromServices] IGetCurrentAuthorizedUser currentUser,
+              CancellationToken token = default
+              ) =>
+            {
+                try
+                {
+                    if (!await userManager.IsStepUpEnabled(currentUser.CurrentUser.Id, currentUser.CurrentUser.SessionId, token))
+                    {
+                        return Results.Forbid();
+                    }
+                    var result = await passKeyManager.ListPassKey(currentUser.CurrentUser);
+                    return Results.Ok(result);
+                }
+                catch (ForbidException ex)
+                {
+                    return Results.Forbid();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(ex.Message.AsResult());
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    return Results.NotFound(ex.Message.AsResult());
+                }
+                catch (STSYIdentityException ex)
+                {
+                    return Results.InternalServerError(ex.Message.AsResult());
+                }
+            }).RequireAuthorization();
+
+
             return app;
         }
     }
