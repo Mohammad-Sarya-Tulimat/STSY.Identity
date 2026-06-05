@@ -7,6 +7,7 @@ using STSY.Identity.Abstraction.Contract.Models.UserModels;
 using STSY.Identity.Abstraction.Models.Input.account;
 using STSY.Identity.Abstraction.Models.Output;
 using STSY.Identity.Abstraction.Models.Output.Auth;
+using STSY.Identity.Abstraction.Service;
 using STSY.Identity.Models;
 using STSY.Microsoft.Identity.Mappers;
 using System;
@@ -96,15 +97,16 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
                 throw new STSYIdentityException(ex.Message, ex);
             }
         }
-        public async Task<STSYIdentityResult> RemovePassKey(UserData user, byte[] id)
+        public async Task<STSYIdentityResult> RemovePassKey(UserData user, string id)
         {
             try
             {
                 if (user == null) throw new ArgumentNullException(nameof(user), "user data cannot be null");
                 if (id == null) throw new ArgumentNullException(nameof(id), "id cannot be null");
+                var credId = id.Base64UrlToByte();
                 var appUser = await _userManager.FindByIdAsync(user.Id);
                 if (appUser == null) throw new ResourceNotFoundException(nameof(UserData), user.Id, "User not found.");
-                var result = await _userManager.RemovePasskeyAsync(appUser, id);
+                var result = await _userManager.RemovePasskeyAsync(appUser, credId);
                 return result.AsSTSYIdentityResult();
             }
             catch (STSYIdentityException ex) { throw; }
@@ -117,12 +119,7 @@ namespace STSY.Microsoft.Identity.Services.Authenticators
             if (user == null) throw new ArgumentNullException(nameof(user), "user data cannot be null");
             var appUser = await _userManager.FindByIdAsync(user.Id);
             var keys = await _userManager.GetPasskeysAsync(appUser);
-            return keys.Select(key => new UserPassKey
-            {
-                CreatedAt = key.CreatedAt,
-                Id = key.CredentialId,
-                Name = key.Name
-            }).ToList();
+            return keys.Select(key => key.ToUserPassKey()).ToList();
         }
     }
 }

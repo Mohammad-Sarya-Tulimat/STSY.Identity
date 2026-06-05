@@ -83,7 +83,7 @@ namespace STSY.Microsoft.Identity.EndPoints
                 }
             }).RequireAuthorization();
 
-            app.MapDelete($"{prefix}/passkey/{{id}}", async (
+            app.MapDelete($"{prefix}/passkey", async (
                 string id,
                 [FromServices] IPassKeyManager passKeyManager,
                 [FromServices] IUserManager userManager,
@@ -97,7 +97,7 @@ namespace STSY.Microsoft.Identity.EndPoints
                     {
                         return Results.Forbid();
                     }
-                    var result = await passKeyManager.RemovePassKey(currentUser.CurrentUser, Convert.FromBase64String(id));
+                    var result = await passKeyManager.RemovePassKey(currentUser.CurrentUser, id);
                     if (result.Success)
                     {
                         return Results.Ok(result);

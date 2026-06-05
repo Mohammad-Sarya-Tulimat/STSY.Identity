@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using STSY.Identity.Abstraction.Contract.Models;
 using STSY.Identity.Abstraction.Contract.Models.UserModels;
+using STSY.Identity.Abstraction.Service;
 using STSY.Identity.Models;
 using System;
 using System.Linq;
-
 namespace STSY.Microsoft.Identity.Mappers
 {
     public static class UserMapper
@@ -68,7 +68,7 @@ namespace STSY.Microsoft.Identity.Mappers
         {
             return new UserPassKey
             {
-                Id = passkeyInfo.CredentialId,
+                Id = passkeyInfo.CredentialId.ToBase64Url(),
                 Name = passkeyInfo.Name,
                 CreatedAt = passkeyInfo.CreatedAt,
             };

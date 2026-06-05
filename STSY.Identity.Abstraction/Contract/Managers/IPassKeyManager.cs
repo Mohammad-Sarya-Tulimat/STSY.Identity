@@ -36,7 +36,7 @@ namespace STSY.Identity.Abstraction.Contract.Managers
         /// <exception cref="System.ArgumentNullException"> when user or id is null </exception>"
         /// <exception cref="Exeptions.ResourceNotFoundException"></exception>" 
         /// <exception cref="Exeptions.STSYIdentityException">general identity exception</exception>" 
-        Task<STSYIdentityResult> RemovePassKey(UserData user, byte[] id);
+        Task<STSYIdentityResult> RemovePassKey(UserData user, string id);
 
         Task<List<UserPassKey>> ListPassKey(UserData user);
     }
