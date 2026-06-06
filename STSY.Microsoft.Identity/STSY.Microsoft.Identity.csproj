@@ -2,13 +2,20 @@
 
   <PropertyGroup>
 	  <TargetFramework>net10.0</TargetFramework>
-  </PropertyGroup>
-
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>STSY.Microsoft.Identity</PackageId>
+    <Version>1.10.0</Version>
+    <Authors>sarya tulimat</Authors>
+    <Company>ST</Company>
+    <PackageTags>utilities</PackageTags>
+    <RepositoryUrl>https://github.com/Mohammad-Sarya-Tulimat/STSY.Identity</RepositoryUrl>
+    <Description>shared library used on my projects.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup> 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.7" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.7" /> 
-  </ItemGroup>
-
+  </ItemGroup> 
   <ItemGroup>
     <ProjectReference Include="..\STSY.Identity.Abstraction\STSY.Identity.Abstraction.csproj" />
   </ItemGroup>

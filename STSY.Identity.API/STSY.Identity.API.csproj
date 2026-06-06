@@ -3,6 +3,16 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>STSY.Identity.API</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>sarya tulimat</Authors>
+    <Company>ST</Company>
+    <PackageTags>utilities</PackageTags>
+    <RepositoryUrl>https://github.com/Mohammad-Sarya-Tulimat/STSY.Identity</RepositoryUrl>
+    <Description>shared library used on my projects.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup> 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" /> 

@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>STSY.Identity.Facebook</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>sarya tulimat</Authors>
+    <Company>ST</Company>
+    <PackageTags>utilities</PackageTags>
+    <RepositoryUrl>https://github.com/Mohammad-Sarya-Tulimat/STSY.Identity</RepositoryUrl>
+    <Description>shared library used on my projects.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
